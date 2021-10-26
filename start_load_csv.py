@@ -13,8 +13,7 @@ from PyQt5.QtWidgets import QFileDialog, QDialog
 
 class Ui_MainWindow(QDialog):
     def open_main(self, csv_path):
-        main.CSV_PATH = str(csv_path)
-        print(csv_path)
+        main.CSV_PATH = csv_path
         self.window = QtWidgets.QMainWindow()
         self.ui = main.Ui_MainWindow()
         self.ui.setupUi(self.window)
@@ -24,7 +23,7 @@ class Ui_MainWindow(QDialog):
 
     def on_click_select_csv(self):
         csv_name = QFileDialog.getOpenFileName(self, "Select .csv to load graph", "C:", "CSV files (*.csv)")
-        self.open_main(csv_name)
+        self.open_main(str(csv_name[0]))
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
