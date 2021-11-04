@@ -26,7 +26,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.setObjectName("verticalLayout")
 
         self.webEngineView = QtWebEngineWidgets.QWebEngineView(self.centralwidget)
-        self.webEngineView.load(QtCore.QUrl().fromLocalFile(str(pathlib.Path(__file__).parent.resolve()) + r"\nx.html"))
+        self.webEngineView.load(QtCore.QUrl().fromLocalFile(str(pathlib.Path(pathlib.Path(__file__).parent.resolve()) / r"nx.html")))
         self.verticalLayout.addWidget(self.webEngineView,70)
 
         self.main_tab_widget = QtWidgets.QTabWidget(self.centralwidget)
