@@ -41,7 +41,7 @@ def load_graph_from_csv(filename_nodes, filename_edges):
 def draw_graph(nx_graph):
     nt_graph = Network('1080px', '1920px')
     nt_graph.from_nx(nx_graph)
-    nt_graph.show('nx.html')
+    #nt_graph.show('nx.html')
     nt_graph.save_graph('nx.html')
 
 
