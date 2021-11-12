@@ -1,6 +1,7 @@
 import networkx as nx
 from pyvis.network import Network
 import pandas as pd
+import numpy as np
 from classes import  *
 import matplotlib.pyplot as plt
 
@@ -72,13 +73,21 @@ def minimum_spanning_tree(graph):
     return nx.algorithms.minimum_spanning_tree(graph)
 
 
-def draw_graph_layout(layout, graph):
-    # use networkx layouts
-    # one function by layout
-    pass
+def clustering_coefficient(graph, nodes=None, avg=False):
+    if avg:
+        return nx.algorithms.average_clustering(graph)
+    #nodes can be an int or a list of int
+    return nx.algorithms.clustering(graph, nodes=nodes)
 
 
-def clustering_coefficient(graph):
+def degree_of_node(graph, nodes=None, avg=False):
+    if avg:
+        return np.mean([i[1] for i in graph.degree()])
+    # nodes can be an int or a list of int
+    return graph.degree(nodes)
+
+
+def layouts(graph):
     pass
 
 
@@ -95,7 +104,8 @@ def filter(graph):
 
 
 graph = load_graph_from_csv('Data/BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.csv', 'Data/BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.csv')
-#draw_graph(graph)
 #shortest_path(107140, 108517, graph)
-mst = minimum_spanning_tree(graph)
-draw_graph(mst)
+#mst = minimum_spanning_tree(graph)
+#draw_graph(mst)
+#draw_graph(graph)
+print(degree_of_node(graph, [107140, 108517]))
