@@ -2,8 +2,10 @@ import networkx as nx
 from pyvis.network import Network
 import pandas as pd
 import numpy as np
+import community as community_louvain
+import seaborn as sns
+import matplotlib.colors
 from classes import  *
-import matplotlib.pyplot as plt
 
 
 def load_graph_from_csv(filename_nodes, filename_edges):
@@ -87,6 +89,15 @@ def degree_of_node(graph, nodes=None, avg=False):
     return graph.degree(nodes)
 
 
+def find_communities(graph):
+    communities = community_louvain.best_partition(graph)
+    assert isinstance(communities, dict)
+    rgb = sns.color_palette(None, len(set(communities.values())))
+    palette = [matplotlib.colors.to_hex(col) for col in rgb]
+    for node in communities.keys():
+        graph.nodes[node]['color'] = palette[communities[node]]
+
+
 def layouts(graph):
     pass
 
@@ -95,17 +106,16 @@ def betweenness_centrality(graph):
     pass
 
 
-def find_communities(graph):
-    pass
-
-
 def filter(graph):
     pass
 
 
-graph = load_graph_from_csv('Data/BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.csv', 'Data/BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.csv')
-#shortest_path(107140, 108517, graph)
-#mst = minimum_spanning_tree(graph)
-#draw_graph(mst)
-#draw_graph(graph)
-print(degree_of_node(graph, [107140, 108517]))
+if __name__ == "__main__":
+    graph = load_graph_from_csv('Data/BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.csv', 'Data/BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.csv')
+    #shortest_path(107140, 108517, graph)
+    #mst = minimum_spanning_tree(graph)
+    find_communities(graph)
+
+    #draw_graph(mst)
+    draw_graph(graph)
+
