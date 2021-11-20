@@ -5,7 +5,7 @@ import numpy as np
 import community as community_louvain
 import seaborn as sns
 import matplotlib.colors
-from classes import  *
+from classes import *
 
 
 def load_graph_from_csv(filename_nodes, filename_edges):
@@ -18,10 +18,18 @@ def load_graph_from_csv(filename_nodes, filename_edges):
     return G
 
 
-def draw_graph(nx_graph):
+def draw_graph(nx_graph, layout=None):
     nt_graph = Network('1080px', '1920px')
     nt_graph.from_nx(nx_graph)
-    nt_graph.toggle_physics(False)
+    if layout == 'repulsion':
+        nt_graph.show_buttons(filter_=['physics'])
+        nt_graph.repulsion()
+    elif layout == 'atlas':
+        nt_graph.force_atlas_2based()
+    elif layout == 'barnes':
+        nt_graph.barnes_hut()
+    else:
+        nt_graph.toggle_physics(False)
     nt_graph.show('nx.html')
     #nt_graph.save_graph('nx.html')
 
@@ -98,23 +106,28 @@ def find_communities(graph):
         graph.nodes[node]['color'] = palette[communities[node]]
 
 
-def layouts(graph):
-    pass
-
-
 def betweenness_centrality(graph):
-    pass
+    btw_central = nx.betweenness_centrality(graph)
+    assert isinstance(btw_central, dict)
+    rgb = sns.color_palette(None, len(set(btw_central.values())))
+    val = list(set(btw_central.values()))
+    palette = [matplotlib.colors.to_hex(col) for col in rgb]
+    for node in btw_central.keys():
+        graph.nodes[node]['color'] = palette[val.index(btw_central[node])]
 
 
 def filter(graph):
+    #TODO
     pass
 
 
 if __name__ == "__main__":
-    graph = load_graph_from_csv('Data/BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.csv', 'Data/BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.csv')
+    graph = load_graph_from_csv('Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt', 'Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt')
+
     #shortest_path(107140, 108517, graph)
     #mst = minimum_spanning_tree(graph)
-    find_communities(graph)
+    #find_communities(graph)
+    #betweenness_centrality(graph)
 
     #draw_graph(mst)
     draw_graph(graph)
