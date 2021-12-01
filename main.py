@@ -54,12 +54,18 @@ class Ui_MainWindow(object):
         self.layout_filter_line_edit = QtWidgets.QLineEdit(self.tab_layout)
         self.layout_filter_line_edit.setObjectName("layout_filter_line_edit")
         self.layout_filter_layout.addWidget(self.layout_filter_line_edit)
+
         self.layout_filter_button = QtWidgets.QPushButton(self.tab_layout)
         self.layout_filter_button.setObjectName("layout_filter_button")
+        self.layout_filter_button.clicked.connect(
+            lambda: self.selection_list_filter(self.layout_selection_list, self.layout_filter_line_edit.text()))
         self.layout_filter_layout.addWidget(self.layout_filter_button)
+
         self.layout_layout_left.addLayout(self.layout_filter_layout)
         self.layout_selection_list = QtWidgets.QListWidget(self.tab_layout)
+        self.layout_selection_list.itemClicked.connect(self.layout_selection_list_on_item_click)
         self.layout_selection_list.setObjectName("layout_selection_list")
+        self.layout_selection_list_init()
         self.layout_layout_left.addWidget(self.layout_selection_list)
         self.horizontalLayout_2.addLayout(self.layout_layout_left, 4)
 
@@ -92,11 +98,13 @@ class Ui_MainWindow(object):
         self.attr_filter_attr_layout.addWidget(self.atttr_filter_attr_line_edit)
         self.attr_filter_attr_button = QtWidgets.QPushButton(self.tab_attrib)
         self.attr_filter_attr_button.setObjectName("attr_filter_attr_button")
+        self.attr_filter_attr_button.clicked.connect(lambda: self.selection_list_filter(self.attr_selection_list, self.atttr_filter_attr_line_edit.text()))
         self.attr_filter_attr_layout.addWidget(self.attr_filter_attr_button)
         self.tab_attr_vertical_left.addLayout(self.attr_filter_attr_layout, 4)
 
         self.attr_selection_list = QtWidgets.QListWidget(self.tab_attrib)
         self.attr_selection_list.setObjectName("attr_selection_list")
+        self.attr_selection_list_init()
         self.tab_attr_vertical_left.addWidget(self.attr_selection_list)
         self.horizontalLayout.addLayout(self.tab_attr_vertical_left)
         self.tab_attr_vertical_right = QtWidgets.QVBoxLayout()
@@ -159,12 +167,16 @@ class Ui_MainWindow(object):
         self.node_filter_edit = QtWidgets.QLineEdit(self.tab_node_edge)
         self.node_filter_edit.setObjectName("node_filter_edit")
         self.node_filter_hlayout.addWidget(self.node_filter_edit)
+
         self.node_filter_button = QtWidgets.QPushButton(self.tab_node_edge)
         self.node_filter_button.setObjectName("node_filter_button")
+        self.node_filter_button.clicked.connect(lambda : self.selection_list_filter(self.node_selection_list, self.node_filter_edit.text()))
+
         self.node_filter_hlayout.addWidget(self.node_filter_button)
         self.node_vlayout_left.addLayout(self.node_filter_hlayout)
         self.node_selection_list = QtWidgets.QListWidget(self.tab_node_edge)
         self.node_selection_list.setObjectName("node_selection_list")
+        self.node_selection_list_init()
         self.node_vlayout_left.addWidget(self.node_selection_list)
         self.horizontalLayout_3.addLayout(self.node_vlayout_left, 4)
 
@@ -260,12 +272,16 @@ class Ui_MainWindow(object):
         self.edge_filter_edit = QtWidgets.QLineEdit(self.tab_edge)
         self.edge_filter_edit.setObjectName("edge_filter_edit")
         self.edge_filter_hlayout.addWidget(self.edge_filter_edit)
+
         self.edge_filter_button = QtWidgets.QPushButton(self.tab_edge)
         self.edge_filter_button.setObjectName("edge_filter_button")
+        self.edge_filter_button.clicked.connect( lambda: self.selection_list_filter(self.edge_selection_list, self.edge_filter_edit.text()))
+
         self.edge_filter_hlayout.addWidget(self.edge_filter_button)
         self.edge_vlayout_left.addLayout(self.edge_filter_hlayout)
         self.edge_selection_list = QtWidgets.QListWidget(self.tab_edge)
         self.edge_selection_list.setObjectName("edge_selection_list")
+        self.edge_selection_list_init()
         self.edge_vlayout_left.addWidget(self.edge_selection_list)
         self.edge_hlayout.addLayout(self.edge_vlayout_left, 4)
 
@@ -457,6 +473,47 @@ class Ui_MainWindow(object):
 
         self.node_build_button.setText("Build")
         self.node_build_button.setEnabled(True)
+
+
+    def layout_selection_list_init(self):
+        pass
+
+    @staticmethod
+    def layout_selection_list_on_item_click(item):
+        item.setHidden(True)
+
+    def attr_selection_list_init(self):
+        pass
+
+    @staticmethod
+    def attr_selection_list_on_item_click(item):
+        item.setHidden(True)
+
+    def node_selection_list_init(self):
+        for n in self.graph.nodes:
+            self.node_selection_list.addItem(str(n))
+
+        self.node_selection_list.sortItems()
+
+    @staticmethod
+    def node_selection_list_on_item_click(item):
+        item.setHidden(True)
+
+    def edge_selection_list_init(self):
+        for e in self.graph.edges:
+            self.edge_selection_list.addItem(str(e))
+
+        self.node_selection_list.sortItems()
+
+    @staticmethod
+    def edge_selection_list_on_item_click(item):
+        item.setHidden(True)
+
+    @staticmethod
+    def selection_list_filter(selection_list, filtering_str):
+        for i in range(selection_list.count()):
+            item = selection_list.item(i)
+            item.setHidden(filtering_str != item.text()[:len(filtering_str)])
 
 if __name__ == "__main__":
     import sys
