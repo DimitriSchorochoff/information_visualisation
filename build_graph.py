@@ -30,8 +30,8 @@ def draw_graph(nx_graph, layout=None):
         nt_graph.barnes_hut()
     else:
         nt_graph.toggle_physics(False)
-    nt_graph.show('nx.html')
-    #nt_graph.save_graph('nx.html')
+    #nt_graph.show('nx.html')
+    nt_graph.save_graph('nx.html')
 
 
 def add_Node(graph, id, label=None, color=None, size=None, neighbourds=None):
