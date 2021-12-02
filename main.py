@@ -18,13 +18,15 @@ FILE_EDGES_PATH = None
 DEBUG = True
 
 if DEBUG:
-    FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
 
 
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
+
+        list_layout = []
 
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
@@ -476,14 +478,22 @@ class Ui_MainWindow(object):
 
 
     def layout_selection_list_init(self):
-        pass
+        self.layout_selection_list.addItem("Circular")
+        self.layout_selection_list.addItem("Force Atlas 2Based")
+        self.layout_selection_list.addItem("Barnes Hut")
+        self.layout_selection_list.addItem("Repulsion")
 
     @staticmethod
     def layout_selection_list_on_item_click(item):
         item.setHidden(True)
 
     def attr_selection_list_init(self):
-        pass
+        self.attr_selection_list.addItem("Shortest Path")
+        self.attr_selection_list.addItem("Minimum Spanning Tree")
+        self.attr_selection_list.addItem("Clustering coefficient")
+        self.attr_selection_list.addItem("Degree of Node")
+        self.attr_selection_list.addItem("Communities")
+        self.attr_selection_list.addItem("Betweenness Centrality")
 
     @staticmethod
     def attr_selection_list_on_item_click(item):
