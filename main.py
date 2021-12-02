@@ -22,10 +22,10 @@ FILE_EDGES_PATH = None
 DEBUG = True
 
 if DEBUG:
-    FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-    #FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    #FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    #FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    #FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
 
 
 class Ui_MainWindow(object):
@@ -434,6 +434,7 @@ class Ui_MainWindow(object):
             print("Loading")
             # Change button display
 
+            currentLayout = self.list_layout[self.ui_window.layout_selection_list.currentRow()]
             build_graph.draw_graph(self.ui_window.graph)
             print("Diplaying")
             self.finished.emit()
@@ -485,10 +486,8 @@ class Ui_MainWindow(object):
 
 
     def layout_selection_list_init(self):
-        self.layout_selection_list.addItem("Barnes Hut")
-        self.layout_selection_list.addItem("Circular")
-        self.layout_selection_list.addItem("Force Atlas 2Based")
-        self.layout_selection_list.addItem("Repulsion")
+        for l in self.list_layout:
+            self.layout_selection_list.addItem(l.name)
 
     @staticmethod
     def layout_selection_list_on_item_click(item):
@@ -534,9 +533,9 @@ class Ui_MainWindow(object):
             if p.data_type == 0:
                 spinbox = QtWidgets.QDoubleSpinBox (self.tab_layout)
                 spinbox.setObjectName("Spinbox_{}".format(p.name))
-                spinbox.setValue(p.start)
                 spinbox.setMaximum(p.maximum)
                 spinbox.setMinimum(p.minimum)
+                spinbox.setValue(p.start)
                 spinbox.valueChanged.connect(Ui_MainWindow.layout_parameter_value_on_click_factory(p))
                 mini_hlayout.addWidget(spinbox)
 
