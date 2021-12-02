@@ -78,11 +78,12 @@ class Layout_parameter:
 
 
 class Layout_parameter_value(Layout_parameter):
-    def __init__(self, name, minimum, maximum, start):
+    def __init__(self, name, minimum, maximum, start, step):
         super().__init__(name, 0)
         self.minimum = minimum
         self.maximum = maximum
         self.start = start
+        self.step = step
 
 class Layout_parameter_boolean(Layout_parameter):
     def __init__(self, name):
