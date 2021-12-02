@@ -12,21 +12,22 @@ from PyQt5 import QtCore, QtWidgets,QtWebEngineWidgets
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
 import pathlib
 import build_graph
+import classes
 
 FILE_NODES_PATH = None
 FILE_EDGES_PATH = None
 DEBUG = True
 
 if DEBUG:
-    FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-
+    #FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    #FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
 
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
-
-        list_layout = []
+        #self.list_layout = [classes.Layout("Alpha", [classes.Layout_parameter_value("Hihi", 2, 0, 10, 3), classes.Layout_parameter_boolean("Haha", 2), classes.Layout_parameter_categorical("Lol", 2, ["Iso", "Propan", "Fuck it"], 1)]), classes.Layout("Beta", [classes.Layout_parameter_boolean("Hihi", 2), classes.Layout_parameter_boolean("Haha", 2)])]
 
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
@@ -65,7 +66,7 @@ class Ui_MainWindow(object):
 
         self.layout_layout_left.addLayout(self.layout_filter_layout)
         self.layout_selection_list = QtWidgets.QListWidget(self.tab_layout)
-        self.layout_selection_list.itemClicked.connect(self.layout_selection_list_on_item_click)
+        self.layout_selection_list.itemClicked.connect(lambda item: self.layout_selection_list_on_item_click(self.layout_selection_list.currentRow()))
         self.layout_selection_list.setObjectName("layout_selection_list")
         self.layout_selection_list_init()
         self.layout_layout_left.addWidget(self.layout_selection_list)
@@ -73,6 +74,8 @@ class Ui_MainWindow(object):
 
         self.layout_layout_right = QtWidgets.QVBoxLayout()
         self.layout_layout_right.setObjectName("layout_layout_right")
+
+        self.layout_layout_right_widget_lst = []
         self.horizontalLayout_2.addLayout(self.layout_layout_right, 5)
 
         self.layout_build_button = QtWidgets.QPushButton(self.tab_layout)
@@ -484,8 +487,88 @@ class Ui_MainWindow(object):
         self.layout_selection_list.addItem("Repulsion")
 
     @staticmethod
-    def layout_selection_list_on_item_click(item):
-        item.setHidden(True)
+    def layout_parameter_value_on_click_factory(layout_param):
+        def layout_parameter_value_on_click(value):
+            layout_param.start = value
+
+        return layout_parameter_value_on_click
+
+    @staticmethod
+    def layout_parameter_boolean_on_click_factory(layout_param):
+        def layout_parameter_boolean_on_click(boolean):
+            layout_param.coched = boolean
+
+        return layout_parameter_boolean_on_click
+
+    @staticmethod
+    def layout_parameter_categorical_on_click_factory(layout_param):
+        def layout_parameter_categorical_on_click(pos):
+            layout_param.start_choice_pos = pos
+
+        return layout_parameter_categorical_on_click
+
+
+    def layout_selection_list_on_item_click(self, item_row):
+        self.layout_adaptive_display_clear()
+
+        layout = self.list_layout[item_row]
+
+        for p in layout.parameter_lst:
+            mini_hlayout = QtWidgets.QHBoxLayout(self.tab_layout)
+
+
+            # Add name
+            label = QtWidgets.QLabel(self.tab_layout)
+            label.setObjectName("Label_{}".format(p.name))
+            label.setText("{}: ".format(p.name))
+            mini_hlayout.addWidget(label)
+
+            #Layout_parameter_value
+            if p.data_type == 0:
+                spinbox = QtWidgets.QDoubleSpinBox (self.tab_layout)
+                spinbox.setObjectName("Spinbox_{}".format(p.name))
+                spinbox.setValue(p.start)
+                spinbox.setMaximum(p.maximum)
+                spinbox.setMinimum(p.minimum)
+                spinbox.valueChanged.connect(Ui_MainWindow.layout_parameter_value_on_click_factory(p))
+                mini_hlayout.addWidget(spinbox)
+
+            #Layout_parameter_boolean
+            elif p.data_type == 1:
+                checkbox = QtWidgets.QCheckBox(self.tab_layout)
+                checkbox.setObjectName("Checkbox_{}".format(p.name))
+                checkbox.setChecked(p.coched)
+                checkbox.clicked.connect(Ui_MainWindow.layout_parameter_boolean_on_click_factory(p))
+                mini_hlayout.addWidget(checkbox)
+
+            #Layout_parameter_categorical
+            elif p.data_type == 2:
+                combobox = QtWidgets.QComboBox(self.tab_layout)
+                combobox.setObjectName("ComboBox_{}".format(p.name))
+                for choice in p.list_choice:
+                    combobox.addItem(choice)
+                combobox.setCurrentIndex(p.start_choice_pos)
+                combobox.currentIndexChanged.connect(Ui_MainWindow.layout_parameter_categorical_on_click_factory(p))
+                mini_hlayout.addWidget(combobox)
+
+            else:
+                raise Exception("ERROR: INVALID LAYOUT PARAMETER")
+
+            # Add spacer to stick widget to the left
+            spacer = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+            mini_hlayout.addSpacerItem(spacer)
+
+            self.layout_layout_right.addLayout(mini_hlayout)
+            self.layout_layout_right_widget_lst.append(mini_hlayout)
+
+    def layout_adaptive_display_clear(self):
+        for w in self.layout_layout_right_widget_lst:
+            for i in reversed(range(w.count())):
+                w.removeWidget(w.itemAt(i).widget())
+
+            self.layout_layout_right.removeItem(w)
+
+        self.layout_layout_right_widget_lst = []
 
     def attr_selection_list_init(self):
         self.attr_selection_list.addItem("Shortest Path")
