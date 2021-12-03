@@ -7,6 +7,9 @@ import seaborn as sns
 import matplotlib.colors
 from classes import *
 
+LAYOUT_NAME_BARNES = "Barnes Hut"
+LAYOUT_NAME_FORCEATLAS = "Force Atlas 2Based"
+LAYOUT_NAME_REPULSION = "Repulsion"
 
 def load_graph_from_csv(filename_nodes, filename_edges):
     df_node = pd.read_csv(filename_nodes, sep='\t')
@@ -21,12 +24,15 @@ def load_graph_from_csv(filename_nodes, filename_edges):
 def draw_graph(nx_graph, layout=None):
     nt_graph = Network('1080px', '1920px')
     nt_graph.from_nx(nx_graph)
-    if layout == 'repulsion':
+
+    if layout is None:
+        nt_graph.toggle_physics(False)
+    elif layout.name == LAYOUT_NAME_REPULSION:
         nt_graph.show_buttons(filter_=['physics'])
         nt_graph.repulsion()
-    elif layout == 'atlas':
+    elif layout.name == LAYOUT_NAME_FORCEATLAS:
         nt_graph.force_atlas_2based()
-    elif layout == 'barnes':
+    elif layout.name == LAYOUT_NAME_BARNES:
         nt_graph.barnes_hut()
     else:
         nt_graph.toggle_physics(False)

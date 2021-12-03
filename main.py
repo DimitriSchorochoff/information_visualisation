@@ -31,7 +31,7 @@ if DEBUG:
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
-        self.list_layout = [classes.Layout("Barnes Hut", [classes.Layout_parameter_value("Barnes Hut", -100000, -3000, -80000, 500),classes.Layout_parameter_boolean("Barnes Hut")]), classes.Layout("Force Atlas 2Based", [classes.Layout_parameter_value("Force Atlas 2Based", -100, -20, -50, 20),classes.Layout_parameter_boolean("Force Atlas 2Based")]), classes.Layout("Repulsion", [classes.Layout_parameter_value("Repulsion", 10, 500, 100, 50),classes.Layout_parameter_boolean("Repulsion")])]
+        self.list_layout = [classes.Layout(build_graph.LAYOUT_NAME_BARNES, [classes.Layout_parameter_value("Barnes Hut", -100000, -3000, -80000),classes.Layout_parameter_boolean("Barnes Hut")]), classes.Layout(build_graph.LAYOUT_NAME_FORCEATLAS, [classes.Layout_parameter_value("Force Atlas 2Based", -100, -20, -50),classes.Layout_parameter_boolean("Force Atlas 2Based")]), classes.Layout(build_graph.LAYOUT_NAME_REPULSION, [classes.Layout_parameter_value("Repulsion", 10, 500, 100),classes.Layout_parameter_boolean("Repulsion")])]
 
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
@@ -434,8 +434,14 @@ class Ui_MainWindow(object):
             print("Loading")
             # Change button display
 
-            #currentLayout = self.list_layout[self.ui_window.layout_selection_list.currentRow()]
-            build_graph.draw_graph(self.ui_window.graph)
+            current_layout_pos = self.ui_window.layout_selection_list.currentRow()
+            if current_layout_pos == -1:
+                current_layout = None
+            else:
+                current_layout = self.list_layout[current_layout_pos]
+
+            build_graph.draw_graph(self.ui_window.graph, current_layout)
+
             print("Diplaying")
             self.finished.emit()
 
