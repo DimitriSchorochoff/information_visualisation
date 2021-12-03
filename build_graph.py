@@ -7,9 +7,11 @@ import seaborn as sns
 import matplotlib.colors
 from classes import *
 
-LAYOUT_NAME_BARNES = "Barnes Hut"
-LAYOUT_NAME_FORCEATLAS = "Force Atlas 2Based"
-LAYOUT_NAME_REPULSION = "Repulsion"
+LAYOUT_DEFAULT = Layout("Default", [])
+LAYOUT_BARNES = Layout("Barnes Hut", [Layout_parameter_value("Gravity",-100000, -1, -80000, 1000), Layout_parameter_value("Central gravity", 0, 100, 0.3, 0.1), Layout_parameter_value("Spring length", 0, 1000, 250, 10), Layout_parameter_value("Spring strength", 0, 1, 0.001, 0.001), Layout_parameter_value("Damping", 0, 1, 0.09, 0.01), Layout_parameter_value("Overlap", 0, 1, 0, 0.1)])
+LAYOUT_FORCEATLAS = Layout("Force Atlas 2Based", [Layout_parameter_value("Gravity",-100000, -1, -50, 10), Layout_parameter_value("Central gravity", 0, 100, 0.01, 0.01), Layout_parameter_value("Spring length", 0, 1000, 100, 10), Layout_parameter_value("Spring strength", 0, 1, 0.08, 0.01), Layout_parameter_value("Damping", 0, 1, 0.4, 0.1), Layout_parameter_value("Overlap", 0, 1, 0, 0.1)])
+LAYOUT_REPULSION = Layout("Repulsion", [Layout_parameter_value("Node distance",0, 10000, 100, 10), Layout_parameter_value("Central gravity", 0, 100, 0.2, 0.1), Layout_parameter_value("Spring length", 0, 1000, 200, 10), Layout_parameter_value("Spring strength", 0, 1, 0.05, 0.01), Layout_parameter_value("Damping", 0, 1, 0.09, 0.01)])
+
 
 def load_graph_from_csv(filename_nodes, filename_edges):
     df_node = pd.read_csv(filename_nodes, sep='\t')
@@ -23,20 +25,21 @@ def load_graph_from_csv(filename_nodes, filename_edges):
 
 def draw_graph(nx_graph, layout=None):
     nt_graph = Network('1080px', '1920px')
-    nt_graph.from_nx(nx_graph)
+    nt_graph.from_nx(nx_graph) #TODO find a way to avoid computing this line every time
 
-    if layout is None:
+    if layout is None or layout.name == LAYOUT_DEFAULT.name:
         nt_graph.toggle_physics(False)
-    elif layout.name == LAYOUT_NAME_REPULSION:
+    elif layout.name == LAYOUT_REPULSION.name:
         nt_graph.show_buttons(filter_=['physics'])
         nt_graph.repulsion()
-    elif layout.name == LAYOUT_NAME_FORCEATLAS:
+    elif layout.name == LAYOUT_FORCEATLAS.name:
         nt_graph.force_atlas_2based()
-    elif layout.name == LAYOUT_NAME_BARNES:
-        nt_graph.barnes_hut()
+    elif layout.name == LAYOUT_BARNES.name:
+        list_param = layout.parameter_lst
+        nt_graph.barnes_hut(gravity=list_param[0].start, central_gravity=list_param[1].start, spring_length=list_param[2].start, spring_strength=list_param[3].start, damping=list_param[4].start, overlap=list_param[5].start)
     else:
-        nt_graph.toggle_physics(False)
-    #nt_graph.show('nx.html')
+        raise Exception("Invalid layout error")
+
     nt_graph.save_graph('nx.html')
 
 

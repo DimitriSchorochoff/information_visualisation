@@ -22,17 +22,16 @@ FILE_EDGES_PATH = None
 DEBUG = True
 
 if DEBUG:
-    FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-    #FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    #FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    #FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    #FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
 
 
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
-        self.list_layout = [classes.Layout(build_graph.LAYOUT_NAME_BARNES, [classes.Layout_parameter_value("Barnes Hut", -100000, -3000, -80000),classes.Layout_parameter_boolean("Barnes Hut")]), classes.Layout(build_graph.LAYOUT_NAME_FORCEATLAS, [classes.Layout_parameter_value("Force Atlas 2Based", -100, -20, -50),classes.Layout_parameter_boolean("Force Atlas 2Based")]), classes.Layout(build_graph.LAYOUT_NAME_REPULSION, [classes.Layout_parameter_value("Repulsion", 10, 500, 100),classes.Layout_parameter_boolean("Repulsion")])]
-
+        self.list_layout = [build_graph.LAYOUT_DEFAULT, build_graph.LAYOUT_BARNES, build_graph.LAYOUT_FORCEATLAS, build_graph.LAYOUT_REPULSION]
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
 
@@ -73,7 +72,6 @@ class Ui_MainWindow(object):
         self.layout_selection_list.itemClicked.connect(
             lambda item: self.layout_selection_list_on_item_click(self.layout_selection_list.currentRow()))
         self.layout_selection_list.setObjectName("layout_selection_list")
-        self.layout_selection_list_init()
         self.layout_layout_left.addWidget(self.layout_selection_list)
         self.horizontalLayout_2.addLayout(self.layout_layout_left, 4)
 
@@ -113,7 +111,6 @@ class Ui_MainWindow(object):
 
         self.attr_selection_list = QtWidgets.QListWidget(self.tab_attrib)
         self.attr_selection_list.setObjectName("attr_selection_list")
-        self.attr_selection_list_init()
         self.tab_attr_vertical_left.addWidget(self.attr_selection_list)
         self.horizontalLayout.addLayout(self.tab_attr_vertical_left)
         self.tab_attr_vertical_right = QtWidgets.QVBoxLayout()
@@ -185,7 +182,6 @@ class Ui_MainWindow(object):
         self.node_vlayout_left.addLayout(self.node_filter_hlayout)
         self.node_selection_list = QtWidgets.QListWidget(self.tab_node_edge)
         self.node_selection_list.setObjectName("node_selection_list")
-        self.node_selection_list_init()
         self.node_vlayout_left.addWidget(self.node_selection_list)
         self.horizontalLayout_3.addLayout(self.node_vlayout_left, 4)
 
@@ -290,7 +286,6 @@ class Ui_MainWindow(object):
         self.edge_vlayout_left.addLayout(self.edge_filter_hlayout)
         self.edge_selection_list = QtWidgets.QListWidget(self.tab_edge)
         self.edge_selection_list.setObjectName("edge_selection_list")
-        self.edge_selection_list_init()
         self.edge_vlayout_left.addWidget(self.edge_selection_list)
         self.edge_hlayout.addLayout(self.edge_vlayout_left, 4)
 
@@ -386,6 +381,11 @@ class Ui_MainWindow(object):
         self.main_tab_widget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        # Init selection list
+        self.layout_selection_list_init()
+        self.attr_selection_list_init()
+        self.node_selection_list_init()
+        self.edge_selection_list_init()
         # Compute then display graph
         self.runComputeAndDisplayGraph()
 
@@ -438,7 +438,7 @@ class Ui_MainWindow(object):
             if current_layout_pos == -1:
                 current_layout = None
             else:
-                current_layout = self.list_layout[current_layout_pos]
+                current_layout = self.ui_window.list_layout[current_layout_pos]
 
             build_graph.draw_graph(self.ui_window.graph, current_layout)
 
@@ -495,6 +495,10 @@ class Ui_MainWindow(object):
         for l in self.list_layout:
             self.layout_selection_list.addItem(l.name)
 
+        default_value = 0
+        self.layout_selection_list.setCurrentRow(default_value)
+        self.layout_selection_list_on_item_click(default_value)
+
     @staticmethod
     def layout_selection_list_on_item_click(item):
         item.setHidden(True)
@@ -539,10 +543,13 @@ class Ui_MainWindow(object):
             if p.data_type == 0:
                 spinbox = QtWidgets.QDoubleSpinBox (self.tab_layout)
                 spinbox.setObjectName("Spinbox_{}".format(p.name))
+
+                spinbox.setDecimals(compute_number_of_decimal(p.start))
                 spinbox.setMaximum(p.maximum)
                 spinbox.setMinimum(p.minimum)
                 spinbox.setSingleStep(p.step)
                 spinbox.setValue(p.start)
+
                 spinbox.valueChanged.connect(Ui_MainWindow.layout_parameter_value_on_click_factory(p))
                 mini_hlayout.addWidget(spinbox)
 
@@ -622,6 +629,21 @@ class Ui_MainWindow(object):
         for i in range(selection_list.count()):
             item = selection_list.item(i)
             item.setHidden(filtering_str != item.text()[:len(filtering_str)])
+
+
+def compute_number_of_decimal(float):
+    abs_start = abs(float)
+    if abs_start >= 100:
+        num_dec = 0
+    elif abs_start == 0:
+        num_dec = 2
+    else:
+        num_dec = 1
+        while abs_start < 1:
+            abs_start *= 10
+            num_dec += 1
+
+    return num_dec
 
 if __name__ == "__main__":
     import sys
