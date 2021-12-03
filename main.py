@@ -535,6 +535,7 @@ class Ui_MainWindow(object):
                 spinbox.setObjectName("Spinbox_{}".format(p.name))
                 spinbox.setMaximum(p.maximum)
                 spinbox.setMinimum(p.minimum)
+                spinbox.setSingleStep(p.step)
                 spinbox.setValue(p.start)
                 spinbox.valueChanged.connect(Ui_MainWindow.layout_parameter_value_on_click_factory(p))
                 mini_hlayout.addWidget(spinbox)
