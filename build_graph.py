@@ -20,7 +20,7 @@ def load_graph_from_csv(filename_nodes, filename_edges):
     G = nx.Graph()
     G.add_nodes_from(df_node['#BIOGRID ID'])
     G.add_edges_from(zip(df_edge['BioGRID ID Interactor A'], df_edge['BioGRID ID Interactor B']), color='black')
-    return G
+    return G, df_node, df_edge
 
 
 def draw_graph(nx_graph, layout=None):
@@ -131,7 +131,7 @@ def filter(graph):
 
 
 if __name__ == "__main__":
-    graph = load_graph_from_csv('Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt', 'Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt')
+    graph, df_node, df_edge = load_graph_from_csv('Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt', 'Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt')
 
     #shortest_path(107140, 108517, graph)
     #mst = minimum_spanning_tree(graph)
@@ -140,4 +140,3 @@ if __name__ == "__main__":
 
     #draw_graph(mst)
     draw_graph(graph)
-
