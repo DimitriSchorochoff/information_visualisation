@@ -22,10 +22,10 @@ FILE_EDGES_PATH = None
 DEBUG = True
 
 if DEBUG:
-    #FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    #FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-    FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    #FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    #FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
 
 
 class Ui_MainWindow(object):
@@ -41,7 +41,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.setObjectName("verticalLayout")
 
         self.webEngineView = QtWebEngineWidgets.QWebEngineView(self.centralwidget)
-        self.graph = build_graph.load_graph_from_csv(FILE_NODES_PATH, FILE_EDGES_PATH)
+        self.graph, self.df_node, self.df_edge = build_graph.load_graph_from_csv(FILE_NODES_PATH, FILE_EDGES_PATH)
 
         self.verticalLayout.addWidget(self.webEngineView,70)
 
@@ -184,6 +184,7 @@ class Ui_MainWindow(object):
         self.node_selection_list.setObjectName("node_selection_list")
         self.node_vlayout_left.addWidget(self.node_selection_list)
         self.horizontalLayout_3.addLayout(self.node_vlayout_left, 4)
+        self.node_selection_list.itemClicked.connect(lambda item : self.node_selection_list_on_item_click(self.node_selection_list.currentItem()))
 
         self.node_vlayout_right = QtWidgets.QVBoxLayout()
         self.node_vlayout_right.setObjectName("node_vlayout_right")
@@ -288,6 +289,8 @@ class Ui_MainWindow(object):
         self.edge_selection_list.setObjectName("edge_selection_list")
         self.edge_vlayout_left.addWidget(self.edge_selection_list)
         self.edge_hlayout.addLayout(self.edge_vlayout_left, 4)
+        self.edge_selection_list.itemClicked.connect(
+            lambda item: self.edge_selection_list_on_item_click(self.edge_selection_list.currentItem()))
 
         self.edge_vlayout_right = QtWidgets.QVBoxLayout()
         self.edge_vlayout_right.setObjectName("edge_vlayout_right")
@@ -614,6 +617,12 @@ class Ui_MainWindow(object):
     def node_selection_list_on_item_click(item):
         item.setHidden(True)
 
+    def node_selection_list_on_item_click(self, item):
+        data = self.df_node.loc[self.df_node['#BIOGRID ID'] == int(item.text())]
+        print(data)
+        #QMessageBox.about(self, "Title", data)
+
+
     def edge_selection_list_init(self):
         for e in self.graph.edges:
             self.edge_selection_list.addItem(str(e))
@@ -623,6 +632,12 @@ class Ui_MainWindow(object):
     @staticmethod
     def edge_selection_list_on_item_click(item):
         item.setHidden(True)
+
+    def edge_selection_list_on_item_click(self, item):
+        edge = item.text().strip('()').replace(" ", "").split(',')
+        data = self.df_edge.loc[(self.df_edge['BioGRID ID Interactor A']==int(edge[0])) & (self.df_edge['BioGRID ID Interactor B']==int(edge[1]))]
+        print(data)
+        #QMessageBox.about(self, "Title", data)
 
     @staticmethod
     def selection_list_filter(selection_list, filtering_str):
