@@ -9,7 +9,7 @@
 
 
 from PyQt5 import QtCore, QtWidgets,QtWebEngineWidgets
-from PyQt5.QtCore import QObject, QThread, pyqtSignal
+from PyQt5.QtCore import QObject, QThread, pyqtSignal, Qt, QSize
 import pathlib
 
 from PyQt5.QtWidgets import QMessageBox
@@ -22,10 +22,10 @@ FILE_EDGES_PATH = None
 DEBUG = True
 
 if DEBUG:
-    FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-    #FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    #FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    #FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    #FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
 
 
 class Ui_MainWindow(object):
@@ -40,10 +40,16 @@ class Ui_MainWindow(object):
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName("verticalLayout")
 
+        self.splitter = QtWidgets.QSplitter(MainWindow)
+        self.splitter.setOrientation(QtCore.Qt.Vertical)
+        self.splitter.setStretchFactor(1, 1)
+        self.verticalLayout.addWidget(self.splitter)
+
         self.webEngineView = QtWebEngineWidgets.QWebEngineView(self.centralwidget)
         self.graph, self.df_node, self.df_edge = build_graph.load_graph_from_csv(FILE_NODES_PATH, FILE_EDGES_PATH)
 
-        self.verticalLayout.addWidget(self.webEngineView,70)
+        #self.verticalLayout.addWidget(self.webEngineView,70)
+        self.splitter.addWidget(self.webEngineView)
 
         self.main_tab_widget = QtWidgets.QTabWidget(self.centralwidget)
         self.main_tab_widget.setObjectName("main_tab_widget")
@@ -78,7 +84,18 @@ class Ui_MainWindow(object):
         self.layout_layout_right = QtWidgets.QVBoxLayout()
         self.layout_layout_right.setObjectName("layout_layout_right")
         self.layout_layout_right_widget_lst = []
-        self.horizontalLayout_2.addLayout(self.layout_layout_right, 5)
+
+        self.layout_widget_right = QtWidgets.QWidget()
+        self.layout_widget_right.setLayout(self.layout_layout_right)
+
+        self.layout_scroll_area = QtWidgets.QScrollArea()
+        self.layout_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.layout_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.layout_scroll_area.setWidgetResizable(True)
+        self.layout_scroll_area.setWidget(self.layout_widget_right)
+
+
+        self.horizontalLayout_2.addWidget(self.layout_scroll_area, 6)
 
         self.layout_build_button = QtWidgets.QPushButton(self.tab_layout)
         self.layout_build_button.setObjectName("layout_build_button")
@@ -370,7 +387,8 @@ class Ui_MainWindow(object):
         self.edge_hlayout.addWidget(self.edge_build_button, 1)
 
         self.main_tab_widget.addTab(self.tab_edge, "")
-        self.verticalLayout.addWidget(self.main_tab_widget, 30)
+        self.splitter.addWidget(self.main_tab_widget)
+        #self.verticalLayout.addWidget(self.main_tab_widget, 30)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
@@ -383,6 +401,9 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         self.main_tab_widget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+        #Set default qsplitter size
+        self.splitter.setSizes([400, 50])
 
         # Init selection list
         self.layout_selection_list_init()
@@ -501,10 +522,6 @@ class Ui_MainWindow(object):
         default_value = 0
         self.layout_selection_list.setCurrentRow(default_value)
         self.layout_selection_list_on_item_click(default_value)
-
-    @staticmethod
-    def layout_selection_list_on_item_click(item):
-        item.setHidden(True)
 
     def layout_parameter_value_on_click_factory(layout_param):
         def layout_parameter_value_on_click(value):
