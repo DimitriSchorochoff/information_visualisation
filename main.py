@@ -17,6 +17,10 @@ from PyQt5.QtWidgets import QMessageBox
 import build_graph
 import classes
 
+#STR
+STR_ALL_NODES = "(All nodes)"
+STR_ALL_EDGES = "(All edges)"
+
 FILE_NODES_PATH = None
 FILE_EDGES_PATH = None
 DEBUG = True
@@ -179,25 +183,25 @@ class Ui_MainWindow(object):
         self.main_tab_widget.addTab(self.tab_attrib, "")
 
 
-        self.tab_node_edge = QtWidgets.QWidget()
-        self.tab_node_edge.setObjectName("tab_node_edge")
-        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.tab_node_edge)
+        self.tab_node = QtWidgets.QWidget()
+        self.tab_node.setObjectName("tab_node_edge")
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.tab_node)
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
         self.node_vlayout_left = QtWidgets.QVBoxLayout()
         self.node_vlayout_left.setObjectName("node_vlayout_left")
         self.node_filter_hlayout = QtWidgets.QHBoxLayout()
         self.node_filter_hlayout.setObjectName("node_filter_hlayout")
-        self.node_filter_edit = QtWidgets.QLineEdit(self.tab_node_edge)
+        self.node_filter_edit = QtWidgets.QLineEdit(self.tab_node)
         self.node_filter_edit.setObjectName("node_filter_edit")
         self.node_filter_hlayout.addWidget(self.node_filter_edit)
 
-        self.node_filter_button = QtWidgets.QPushButton(self.tab_node_edge)
+        self.node_filter_button = QtWidgets.QPushButton(self.tab_node)
         self.node_filter_button.setObjectName("node_filter_button")
         self.node_filter_button.clicked.connect(lambda : self.selection_list_filter(self.node_selection_list, self.node_filter_edit.text()))
 
         self.node_filter_hlayout.addWidget(self.node_filter_button)
         self.node_vlayout_left.addLayout(self.node_filter_hlayout)
-        self.node_selection_list = QtWidgets.QListWidget(self.tab_node_edge)
+        self.node_selection_list = QtWidgets.QListWidget(self.tab_node)
         self.node_selection_list.setObjectName("node_selection_list")
         self.node_vlayout_left.addWidget(self.node_selection_list)
         self.horizontalLayout_3.addLayout(self.node_vlayout_left, 4)
@@ -209,7 +213,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_3.addItem(spacerItem1)
-        self.label_5 = QtWidgets.QLabel(self.tab_node_edge)
+        self.label_5 = QtWidgets.QLabel(self.tab_node)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -217,17 +221,19 @@ class Ui_MainWindow(object):
         self.label_5.setSizePolicy(sizePolicy)
         self.label_5.setObjectName("label_5")
         self.verticalLayout_3.addWidget(self.label_5)
+
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
-        self.label_4 = QtWidgets.QLabel(self.tab_node_edge)
+        self.label_4 = QtWidgets.QLabel(self.tab_node)
         self.label_4.setObjectName("label_4")
         self.horizontalLayout_4.addWidget(self.label_4)
-        self.spinBox_2 = QtWidgets.QSpinBox(self.tab_node_edge)
-        self.spinBox_2.setObjectName("spinBox_2")
-        self.horizontalLayout_4.addWidget(self.spinBox_2)
+        self.node_size_spinbox = QtWidgets.QDoubleSpinBox(self.tab_node)
+        self.node_size_spinbox.setObjectName("node_size_spinbox")
+        self.horizontalLayout_4.addWidget(self.node_size_spinbox)
         spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem2)
         self.verticalLayout_3.addLayout(self.horizontalLayout_4)
+
         spacerItem3 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_3.addItem(spacerItem3)
         self.node_vlayout_right.addLayout(self.verticalLayout_3)
@@ -235,32 +241,35 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout_6 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_6.setObjectName("horizontalLayout_6")
-        self.checkBox_2 = QtWidgets.QCheckBox(self.tab_node_edge)
-        self.checkBox_2.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.checkBox_2.setObjectName("checkBox_2")
-        self.horizontalLayout_6.addWidget(self.checkBox_2)
+
+        self.node_show_label_checkbox = QtWidgets.QCheckBox(self.tab_node)
+        self.node_show_label_checkbox.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.node_show_label_checkbox.setObjectName("node_show_label_checkbox")
+        self.horizontalLayout_6.addWidget(self.node_show_label_checkbox)
+
         spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem4)
         self.verticalLayout_2.addLayout(self.horizontalLayout_6)
+
         self.horizontalLayout_7 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_7.setObjectName("horizontalLayout_7")
-        self.label_2 = QtWidgets.QLabel(self.tab_node_edge)
+        self.label_2 = QtWidgets.QLabel(self.tab_node)
         self.label_2.setObjectName("label_2")
         self.horizontalLayout_7.addWidget(self.label_2)
-        self.spinBox = QtWidgets.QSpinBox(self.tab_node_edge)
-        self.spinBox.setObjectName("spinBox")
-        self.horizontalLayout_7.addWidget(self.spinBox)
+        self.node_label_size_spinbox = QtWidgets.QSpinBox(self.tab_node)
+        self.node_label_size_spinbox.setObjectName("node_label_size_spinbox")
+        self.horizontalLayout_7.addWidget(self.node_label_size_spinbox)
         spacerItem5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_7.addItem(spacerItem5)
         self.verticalLayout_2.addLayout(self.horizontalLayout_7)
         self.horizontalLayout_8 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_8.setObjectName("horizontalLayout_8")
-        self.label_3 = QtWidgets.QLabel(self.tab_node_edge)
+        self.label_3 = QtWidgets.QLabel(self.tab_node)
         self.label_3.setObjectName("label_3")
         self.horizontalLayout_8.addWidget(self.label_3)
-        self.fontComboBox = QtWidgets.QFontComboBox(self.tab_node_edge)
-        self.fontComboBox.setObjectName("fontComboBox")
-        self.horizontalLayout_8.addWidget(self.fontComboBox)
+        self.node_label_font_combobox = QtWidgets.QFontComboBox(self.tab_node)
+        self.node_label_font_combobox.setObjectName("fontComboBox")
+        self.horizontalLayout_8.addWidget(self.node_label_font_combobox)
         spacerItem6 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_8.addItem(spacerItem6)
         self.verticalLayout_2.addLayout(self.horizontalLayout_8)
@@ -279,7 +288,7 @@ class Ui_MainWindow(object):
         self.node_build_button.clicked.connect(self.runComputeAndDisplayGraph)
         self.horizontalLayout_3.addWidget(self.node_build_button, 1)
 
-        self.main_tab_widget.addTab(self.tab_node_edge, "")
+        self.main_tab_widget.addTab(self.tab_node, "")
 
 
 
@@ -328,9 +337,9 @@ class Ui_MainWindow(object):
         self.edge_label_4 = QtWidgets.QLabel(self.tab_edge)
         self.edge_label_4.setObjectName("edge_label_4")
         self.edge_horizontalLayout_4.addWidget(self.edge_label_4)
-        self.spinBox_2 = QtWidgets.QSpinBox(self.tab_edge)
-        self.spinBox_2.setObjectName("spinBox_2")
-        self.edge_horizontalLayout_4.addWidget(self.spinBox_2)
+        self.edge_size_spinbox = QtWidgets.QSpinBox(self.tab_edge)
+        self.edge_size_spinbox.setObjectName("edge_size_spinbox")
+        self.edge_horizontalLayout_4.addWidget(self.edge_size_spinbox)
         spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.edge_horizontalLayout_4.addItem(spacerItem2)
         self.edge_verticalLayout_3.addLayout(self.edge_horizontalLayout_4)
@@ -341,10 +350,10 @@ class Ui_MainWindow(object):
         self.edge_verticalLayout_2.setObjectName("edge_verticalLayout_2")
         self.edge_horizontalLayout_6 = QtWidgets.QHBoxLayout()
         self.edge_horizontalLayout_6.setObjectName("edge_horizontalLayout_6")
-        self.edge_checkBox_2 = QtWidgets.QCheckBox(self.tab_edge)
-        self.edge_checkBox_2.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.edge_checkBox_2.setObjectName("edge_checkBox_2")
-        self.edge_horizontalLayout_6.addWidget(self.edge_checkBox_2)
+        self.edge_show_label_checkbox = QtWidgets.QCheckBox(self.tab_edge)
+        self.edge_show_label_checkbox.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.edge_show_label_checkbox.setObjectName("edge_show_label_checkbox")
+        self.edge_horizontalLayout_6.addWidget(self.edge_show_label_checkbox)
         spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.edge_horizontalLayout_6.addItem(spacerItem4)
         self.edge_verticalLayout_2.addLayout(self.edge_horizontalLayout_6)
@@ -353,9 +362,9 @@ class Ui_MainWindow(object):
         self.edge_label_2 = QtWidgets.QLabel(self.tab_edge)
         self.edge_label_2.setObjectName("edge_label_2")
         self.edge_horizontalLayout_7.addWidget(self.edge_label_2)
-        self.spinBox = QtWidgets.QSpinBox(self.tab_edge)
-        self.spinBox.setObjectName("spinBox")
-        self.edge_horizontalLayout_7.addWidget(self.spinBox)
+        self.edge_label_size_spinbox = QtWidgets.QSpinBox(self.tab_edge)
+        self.edge_label_size_spinbox.setObjectName("edge_label_size_spinbox")
+        self.edge_horizontalLayout_7.addWidget(self.edge_label_size_spinbox)
         spacerItem5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.edge_horizontalLayout_7.addItem(spacerItem5)
         self.edge_verticalLayout_2.addLayout(self.edge_horizontalLayout_7)
@@ -430,8 +439,8 @@ class Ui_MainWindow(object):
         self.edge_label_5.setText(_translate("MainWindow", "Edge color"))
         self.label_4.setText(_translate("MainWindow", "Node size"))
         self.edge_label_4.setText(_translate("MainWindow", "Edge size"))
-        self.checkBox_2.setText(_translate("MainWindow", "Show label"))
-        self.edge_checkBox_2.setText(_translate("MainWindow", "Show label"))
+        self.node_show_label_checkbox.setText(_translate("MainWindow", "Show label"))
+        self.edge_show_label_checkbox.setText(_translate("MainWindow", "Show label"))
         self.label_2.setText(_translate("MainWindow", "Label size"))
         self.edge_label_2.setText(_translate("MainWindow", "Label size"))
         self.label_3.setText(_translate("MainWindow", "Label font"))
@@ -442,7 +451,7 @@ class Ui_MainWindow(object):
         self.edge_build_button.setText(_translate("MainWindow", "Build"))
         self.node_build_button.setText(_translate("MainWindow", "Build"))
 
-        self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.tab_node_edge), _translate("MainWindow", "Node"))
+        self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.tab_node), _translate("MainWindow", "Node"))
         self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.tab_edge),
                                         _translate("MainWindow", "Edge"))
 
@@ -464,7 +473,7 @@ class Ui_MainWindow(object):
             else:
                 current_layout = self.ui_window.list_layout[current_layout_pos]
 
-            build_graph.draw_graph(self.ui_window.graph, current_layout)
+            build_graph.draw_graph(self.ui_window.graph.copy(), current_layout)
 
             print("Diplaying")
             self.finished.emit()
@@ -624,19 +633,28 @@ class Ui_MainWindow(object):
         item.setHidden(True)
 
     def node_selection_list_init(self):
-        self.node_selection_list.addItem("(All nodes)")
+        self.node_selection_list.clear()
+
+        self.node_selection_list.addItem(STR_ALL_NODES)
         for n in self.graph.nodes:
             self.node_selection_list.addItem(str(n))
 
         self.node_selection_list.sortItems()
 
-    @staticmethod
-    def node_selection_list_on_item_click(item):
-        item.setHidden(True)
 
     def node_selection_list_on_item_click(self, item):
-        data = self.df_node.loc[self.df_node['#BIOGRID ID'] == int(item.text())]
-        print(data)
+        if item.text() == STR_ALL_NODES:
+            print("APPLY TO ALL NODE")
+
+        build_graph.remove_Node(self.graph, int(item.text()))
+        self.node_selection_list_init()
+
+    def node_selection_list_on_item_double_click(self, item):
+        if item.text() == STR_ALL_NODES:
+            print("APPLY TO ALL NODE")
+        else:
+            data = self.df_node.loc[self.df_node['#BIOGRID ID'] == int(item.text())]
+            print(data)
         #QMessageBox.about(self, "Title", data)
 
 

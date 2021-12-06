@@ -8,9 +8,23 @@ import matplotlib.colors
 from classes import *
 
 LAYOUT_DEFAULT = Layout("Default", [])
-LAYOUT_BARNES = Layout("Barnes Hut", [Layout_parameter_value("Gravity",-100000, -1, -80000, 1000), Layout_parameter_value("Central gravity", 0, 100, 0.3, 0.1), Layout_parameter_value("Spring length", 0, 1000, 250, 10), Layout_parameter_value("Spring strength", 0, 1, 0.001, 0.001), Layout_parameter_value("Damping", 0, 1, 0.09, 0.01), Layout_parameter_value("Overlap", 0, 1, 0, 0.1)])
-LAYOUT_FORCEATLAS = Layout("Force Atlas 2Based", [Layout_parameter_value("Gravity",-100000, -1, -50, 10), Layout_parameter_value("Central gravity", 0, 100, 0.01, 0.01), Layout_parameter_value("Spring length", 0, 1000, 100, 10), Layout_parameter_value("Spring strength", 0, 1, 0.08, 0.01), Layout_parameter_value("Damping", 0, 1, 0.4, 0.1), Layout_parameter_value("Overlap", 0, 1, 0, 0.1)])
-LAYOUT_REPULSION = Layout("Repulsion", [Layout_parameter_value("Node distance",0, 10000, 100, 10), Layout_parameter_value("Central gravity", 0, 100, 0.2, 0.1), Layout_parameter_value("Spring length", 0, 1000, 200, 10), Layout_parameter_value("Spring strength", 0, 1, 0.05, 0.01), Layout_parameter_value("Damping", 0, 1, 0.09, 0.01)])
+LAYOUT_BARNES = Layout("Barnes Hut", [Layout_parameter_value("Gravity", -100000, -1, -80000, 1000),
+                                      Layout_parameter_value("Central gravity", 0, 100, 0.3, 0.1),
+                                      Layout_parameter_value("Spring length", 0, 1000, 250, 10),
+                                      Layout_parameter_value("Spring strength", 0, 1, 0.001, 0.001),
+                                      Layout_parameter_value("Damping", 0, 1, 0.09, 0.01),
+                                      Layout_parameter_value("Overlap", 0, 1, 0, 0.1)])
+LAYOUT_FORCEATLAS = Layout("Force Atlas 2Based", [Layout_parameter_value("Gravity", -100000, -1, -50, 10),
+                                                  Layout_parameter_value("Central gravity", 0, 100, 0.01, 0.01),
+                                                  Layout_parameter_value("Spring length", 0, 1000, 100, 10),
+                                                  Layout_parameter_value("Spring strength", 0, 1, 0.08, 0.01),
+                                                  Layout_parameter_value("Damping", 0, 1, 0.4, 0.1),
+                                                  Layout_parameter_value("Overlap", 0, 1, 0, 0.1)])
+LAYOUT_REPULSION = Layout("Repulsion", [Layout_parameter_value("Node distance", 0, 10000, 100, 10),
+                                        Layout_parameter_value("Central gravity", 0, 100, 0.2, 0.1),
+                                        Layout_parameter_value("Spring length", 0, 1000, 200, 10),
+                                        Layout_parameter_value("Spring strength", 0, 1, 0.05, 0.01),
+                                        Layout_parameter_value("Damping", 0, 1, 0.09, 0.01)])
 
 
 def load_graph_from_csv(filename_nodes, filename_edges):
@@ -18,14 +32,14 @@ def load_graph_from_csv(filename_nodes, filename_edges):
     df_edge = pd.read_csv(filename_edges, sep='\t', low_memory=False)
 
     G = nx.Graph()
-    G.add_nodes_from(df_node['#BIOGRID ID'])
+    G.add_nodes_from(df_node['#BIOGRID ID'], label="A")
     G.add_edges_from(zip(df_edge['BioGRID ID Interactor A'], df_edge['BioGRID ID Interactor B']), color='black')
     return G, df_node, df_edge
 
 
 def draw_graph(nx_graph, layout=None):
     nt_graph = Network('1080px', '1920px')
-    nt_graph.from_nx(nx_graph) #TODO find a way to avoid computing this line every time
+    nt_graph.from_nx(nx_graph)  # TODO find a way to avoid computing this line every time
 
     if layout is None or layout.name == LAYOUT_DEFAULT.name:
         nt_graph.toggle_physics(False)
@@ -36,11 +50,20 @@ def draw_graph(nx_graph, layout=None):
         nt_graph.force_atlas_2based()
     elif layout.name == LAYOUT_BARNES.name:
         list_param = layout.parameter_lst
-        nt_graph.barnes_hut(gravity=list_param[0].start, central_gravity=list_param[1].start, spring_length=list_param[2].start, spring_strength=list_param[3].start, damping=list_param[4].start, overlap=list_param[5].start)
+        nt_graph.barnes_hut(gravity=list_param[0].start, central_gravity=list_param[1].start,
+                            spring_length=list_param[2].start, spring_strength=list_param[3].start,
+                            damping=list_param[4].start, overlap=list_param[5].start)
     else:
         raise Exception("Invalid layout error")
 
     nt_graph.save_graph('nx.html')
+
+
+def str_tuple_2_tuple(st):
+    st = st.replace("(", "")
+    st = st.replace(")", "")
+    st = st.split(",")
+    return int(st[0]), int(st[1])
 
 
 def add_Node(graph, id, label=None, color=None, size=None, neighbourds=None):
@@ -50,9 +73,19 @@ def add_Node(graph, id, label=None, color=None, size=None, neighbourds=None):
         add_Edge(graph, id, elem)
 
 
+def remove_Node(graph, id):
+    assert isinstance(graph, nx.Graph)
+    graph.remove_node(id)
+
+
 def add_Edge(graph, node1, node2, label=None, color=None, size=None):
     assert isinstance(graph, nx.Graph)
     graph.add_edge(node1, node2, label=label, color=color, size=size)
+
+
+def remove_Edge(graph, node1, node2):
+    assert isinstance(graph, nx.Graph)
+    graph.remove_edge(node1, node2)
 
 
 def change_node_color(graph, node, color):
@@ -65,6 +98,16 @@ def change_node_size(graph, node, size):
     graph.nodes[node]['size'] = size
 
 
+def get_node_color(graph, node):
+    assert isinstance(graph, nx.Graph)
+    return graph.nodes[node]['color']
+
+
+def get_node_size(graph, node):
+    assert isinstance(graph, nx.Graph)
+    return graph.nodes[node]['size']
+
+
 def change_edge_color(graph, node1, node2, color):
     assert isinstance(graph, nx.Graph)
     graph[node1][node2]['color'] = color
@@ -75,15 +118,25 @@ def change_edge_width(graph, node1, node2, width):
     graph[node1][node2]['width'] = width
 
 
+def get_edge_color(graph, node1, node2):
+    assert isinstance(graph, nx.Graph)
+    return graph[node1][node2]['color']
+
+
+def get_edge_width(graph, node1, node2):
+    assert isinstance(graph, nx.Graph)
+    return graph[node1][node2]['width']
+
+
 def shortest_path(source, dest, graph):
     path = nx.algorithms.shortest_path(graph, source, dest)
-    idx=0
-    for i in range(len(path)-1):
+    idx = 0
+    for i in range(len(path) - 1):
         change_node_color(graph, path[idx], 'red')
-        change_node_size(graph,path[idx],100)
+        change_node_size(graph, path[idx], 100)
         idx += 1
-        change_edge_color(graph, path[i], path[i+1], 'red')
-        change_edge_width(graph, path[i], path[i+1], 100)
+        change_edge_color(graph, path[i], path[i + 1], 'red')
+        change_edge_width(graph, path[i], path[i + 1], 100)
     change_node_color(graph, path[idx], 'red')
     change_node_size(graph, path[idx], 100)
 
@@ -95,7 +148,7 @@ def minimum_spanning_tree(graph):
 def clustering_coefficient(graph, nodes=None, avg=False):
     if avg:
         return nx.algorithms.average_clustering(graph)
-    #nodes can be an int or a list of int
+    # nodes can be an int or a list of int
     return nx.algorithms.clustering(graph, nodes=nodes)
 
 
@@ -126,17 +179,18 @@ def betweenness_centrality(graph):
 
 
 def filter(graph):
-    #TODO
+    # TODO
     pass
 
 
 if __name__ == "__main__":
-    graph, df_node, df_edge = load_graph_from_csv('Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt', 'Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt')
+    graph, df_node, df_edge = load_graph_from_csv('Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt',
+                                                  'Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt')
 
-    #shortest_path(107140, 108517, graph)
-    #mst = minimum_spanning_tree(graph)
-    #find_communities(graph)
-    #betweenness_centrality(graph)
+    # shortest_path(107140, 108517, graph)
+    # mst = minimum_spanning_tree(graph)
+    # find_communities(graph)
+    # betweenness_centrality(graph)
 
-    #draw_graph(mst)
+    # draw_graph(mst)
     draw_graph(graph)
