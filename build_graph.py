@@ -32,7 +32,7 @@ def load_graph_from_csv(filename_nodes, filename_edges):
     df_edge = pd.read_csv(filename_edges, sep='\t', low_memory=False)
 
     G = nx.Graph()
-    G.add_nodes_from(df_node['#BIOGRID ID'], label="A")
+    G.add_nodes_from(df_node['#BIOGRID ID'])
     G.add_edges_from(zip(df_edge['BioGRID ID Interactor A'], df_edge['BioGRID ID Interactor B']), color='black')
     return G, df_node, df_edge
 
@@ -92,11 +92,20 @@ def change_node_color(graph, node, color):
     assert isinstance(graph, nx.Graph)
     graph.nodes[node]['color'] = color
 
+def change_all_node_color(graph, color):
+    assert isinstance(graph, nx.Graph)
+    for node in graph.nodes:
+        graph.nodes[node]['color'] = color
+
 
 def change_node_size(graph, node, size):
     assert isinstance(graph, nx.Graph)
     graph.nodes[node]['size'] = size
 
+def change_all_node_size(graph, size):
+    assert isinstance(graph, nx.Graph)
+    for node in graph.nodes:
+        graph.nodes[node]['size'] = size
 
 def get_node_color(graph, node):
     assert isinstance(graph, nx.Graph)
@@ -112,11 +121,20 @@ def change_edge_color(graph, node1, node2, color):
     assert isinstance(graph, nx.Graph)
     graph[node1][node2]['color'] = color
 
+def change_all_edge_color(graph, color):
+    assert isinstance(graph, nx.Graph)
+    for node1, node2 in graph.edges:
+        graph[node1][node2]['color'] = color
+
 
 def change_edge_width(graph, node1, node2, width):
     assert isinstance(graph, nx.Graph)
     graph[node1][node2]['width'] = width
 
+def change_all_edge_width(graph, width):
+    assert isinstance(graph, nx.Graph)
+    for node1, node2 in graph.edges:
+        graph[node1][node2]['width'] = width
 
 def get_edge_color(graph, node1, node2):
     assert isinstance(graph, nx.Graph)
