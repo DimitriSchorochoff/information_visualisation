@@ -205,7 +205,7 @@ class Ui_MainWindow(object):
         self.node_selection_list.setObjectName("node_selection_list")
         self.node_vlayout_left.addWidget(self.node_selection_list)
         self.horizontalLayout_3.addLayout(self.node_vlayout_left, 4)
-        self.node_selection_list.itemClicked.connect(lambda item : self.node_selection_list_on_item_click(self.node_selection_list.currentItem()))
+        #self.node_selection_list.itemClicked.connect(lambda item : self.node_selection_list_on_item_click(self.node_selection_list.currentItem()))
         self.node_selection_list.itemDoubleClicked.connect(lambda item: self.node_selection_list_on_item_double_click(self.node_selection_list.currentItem()))
 
         self.node_vlayout_right = QtWidgets.QVBoxLayout()
@@ -316,7 +316,7 @@ class Ui_MainWindow(object):
         self.edge_selection_list.setObjectName("edge_selection_list")
         self.edge_vlayout_left.addWidget(self.edge_selection_list)
         self.edge_hlayout.addLayout(self.edge_vlayout_left, 4)
-        self.edge_selection_list.itemClicked.connect(lambda item: self.edge_selection_list_on_item_click(self.edge_selection_list.currentItem()))
+        #self.edge_selection_list.itemClicked.connect(lambda item: self.edge_selection_list_on_item_click(self.edge_selection_list.currentItem()))
         self.edge_selection_list.itemDoubleClicked.connect(lambda item: self.edge_selection_list_on_item_double_click(self.edge_selection_list.currentItem()))
 
         self.edge_vlayout_right = QtWidgets.QVBoxLayout()
@@ -661,7 +661,7 @@ class Ui_MainWindow(object):
             if data.empty:
                 msg.setText("No information available")
             else:
-                msg.setText(str(data))
+                msg.setText(build_graph.display_data(data))
         msg.exec_()
 
     @staticmethod
@@ -699,7 +699,7 @@ class Ui_MainWindow(object):
             if data.empty:
                 msg.setText("No information available")
             else:
-                msg.setText(str(data))
+                msg.setText(build_graph.display_data(data))
         msg.exec_()
 
 
