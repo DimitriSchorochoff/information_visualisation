@@ -18,18 +18,18 @@ import build_graph
 import classes
 
 #STR
-STR_ALL_NODES = "(All nodes)"
-STR_ALL_EDGES = "(All edges)"
+STR_ALL_NODES = "### All nodes ###"
+STR_ALL_EDGES = "### All edges ###"
 
 FILE_NODES_PATH = None
 FILE_EDGES_PATH = None
 DEBUG = True
 
 if DEBUG:
-    #FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    #FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-    FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    #FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    #FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
 
 
 class Ui_MainWindow(object):
@@ -206,6 +206,7 @@ class Ui_MainWindow(object):
         self.node_vlayout_left.addWidget(self.node_selection_list)
         self.horizontalLayout_3.addLayout(self.node_vlayout_left, 4)
         self.node_selection_list.itemClicked.connect(lambda item : self.node_selection_list_on_item_click(self.node_selection_list.currentItem()))
+        self.node_selection_list.itemDoubleClicked.connect(lambda item: self.node_selection_list_on_item_double_click(self.node_selection_list.currentItem()))
 
         self.node_vlayout_right = QtWidgets.QVBoxLayout()
         self.node_vlayout_right.setObjectName("node_vlayout_right")
@@ -315,8 +316,8 @@ class Ui_MainWindow(object):
         self.edge_selection_list.setObjectName("edge_selection_list")
         self.edge_vlayout_left.addWidget(self.edge_selection_list)
         self.edge_hlayout.addLayout(self.edge_vlayout_left, 4)
-        self.edge_selection_list.itemClicked.connect(
-            lambda item: self.edge_selection_list_on_item_click(self.edge_selection_list.currentItem()))
+        self.edge_selection_list.itemClicked.connect(lambda item: self.edge_selection_list_on_item_click(self.edge_selection_list.currentItem()))
+        self.edge_selection_list.itemDoubleClicked.connect(lambda item: self.edge_selection_list_on_item_double_click(self.edge_selection_list.currentItem()))
 
         self.edge_vlayout_right = QtWidgets.QVBoxLayout()
         self.edge_vlayout_right.setObjectName("edge_vlayout_right")
@@ -644,35 +645,51 @@ class Ui_MainWindow(object):
 
     def node_selection_list_on_item_click(self, item):
         if item.text() == STR_ALL_NODES:
-            print("APPLY TO ALL NODE")
+            print("APPLY TO ALL NODES")
 
         build_graph.remove_Node(self.graph, int(item.text()))
         self.node_selection_list_init()
 
     def node_selection_list_on_item_double_click(self, item):
         if item.text() == STR_ALL_NODES:
-            print("APPLY TO ALL NODE")
+            print("APPLY TO ALL NODES")
         else:
             data = self.df_node.loc[self.df_node['#BIOGRID ID'] == int(item.text())]
             print(data)
         #QMessageBox.about(self, "Title", data)
 
-
-    def edge_selection_list_init(self):
-        for e in self.graph.edges:
-            self.edge_selection_list.addItem(str(e))
-
-        self.node_selection_list.sortItems()
-
     @staticmethod
     def edge_selection_list_on_item_click(item):
         item.setHidden(True)
 
+    def edge_selection_list_init(self):
+        self.edge_selection_list.clear()
+
+        self.edge_selection_list.addItem(STR_ALL_EDGES)
+        for e in self.graph.edges:
+            self.edge_selection_list.addItem(str(e))
+
+        self.edge_selection_list.sortItems()
+
+
     def edge_selection_list_on_item_click(self, item):
+        if item.text() == STR_ALL_EDGES:
+            print("APPLY TO ALL EDGES")
+
         edge = item.text().strip('()').replace(" ", "").split(',')
-        data = self.df_edge.loc[(self.df_edge['BioGRID ID Interactor A']==int(edge[0])) & (self.df_edge['BioGRID ID Interactor B']==int(edge[1]))]
-        print(data)
-        #QMessageBox.about(self, "Title", data)
+        build_graph.remove_Edge(self.graph, int(edge[0]), int(edge[1]))
+        self.edge_selection_list_init()
+
+    def edge_selection_list_on_item_double_click(self, item):
+        if item.text() == STR_ALL_EDGES:
+            print("APPLY TO ALL EDGES")
+        else:
+            edge = item.text().strip('()').replace(" ", "").split(',')
+            data = self.df_edge.loc[(self.df_edge['BioGRID ID Interactor A'] == int(edge[0])) & (
+                        self.df_edge['BioGRID ID Interactor B'] == int(edge[1]))]
+            print(data)
+            # QMessageBox.about(self, "Title", data)
+
 
     @staticmethod
     def selection_list_filter(selection_list, filtering_str):
