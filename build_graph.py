@@ -178,9 +178,12 @@ def betweenness_centrality(graph):
         graph.nodes[node]['color'] = palette[val.index(btw_central[node])]
 
 
-def filter(graph):
-    # TODO
-    pass
+def display_data(df):
+    res = ""
+    for col in df.columns:
+        if str(df.iloc[0][col]) != '-':
+            res += str(col) + ": " + str(df.iloc[0][col])+"\n"
+    return res
 
 
 if __name__ == "__main__":
@@ -193,4 +196,7 @@ if __name__ == "__main__":
     # betweenness_centrality(graph)
 
     # draw_graph(mst)
-    draw_graph(graph)
+    # draw_graph(graph)
+    data = df_node.loc[df_node['#BIOGRID ID'] == 106524]
+    #print(data)
+    print(display_data(data))
