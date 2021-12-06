@@ -660,7 +660,7 @@ class Ui_MainWindow(object):
             else:
                 msg.setText(build_graph.display_data(data))
         retVal = msg.exec_()
-        if retVal == QMessageBox.YesRole:
+        if retVal != QMessageBox.Close:
             build_graph.remove_Node(self.graph, int(item.text()))
             self.node_selection_list_init()
 
@@ -695,7 +695,7 @@ class Ui_MainWindow(object):
             else:
                 msg.setText(build_graph.display_data(data))
         retVal = msg.exec_()
-        if retVal == QMessageBox.YesRole:
+        if retVal != QMessageBox.Close:
             edge = item.text().strip('()').replace(" ", "").split(',')
             build_graph.remove_Edge(self.graph, int(edge[0]), int(edge[1]))
             self.edge_selection_list_init()
