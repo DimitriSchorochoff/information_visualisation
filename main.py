@@ -651,12 +651,18 @@ class Ui_MainWindow(object):
         self.node_selection_list_init()
 
     def node_selection_list_on_item_double_click(self, item):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setWindowTitle("Node data")
         if item.text() == STR_ALL_NODES:
-            print("APPLY TO ALL NODES")
+            msg.setText("APPLY TO ALL NODES")
         else:
             data = self.df_node.loc[self.df_node['#BIOGRID ID'] == int(item.text())]
-            print(data)
-        #QMessageBox.about(self, "Title", data)
+            if data.empty:
+                msg.setText("No information available")
+            else:
+                msg.setText(str(data))
+        msg.exec_()
 
     @staticmethod
     def edge_selection_list_on_item_click(item):
@@ -681,14 +687,20 @@ class Ui_MainWindow(object):
         self.edge_selection_list_init()
 
     def edge_selection_list_on_item_double_click(self, item):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setWindowTitle("Edge data")
         if item.text() == STR_ALL_EDGES:
-            print("APPLY TO ALL EDGES")
+            msg.setText("APPLY TO ALL EDGES")
         else:
             edge = item.text().strip('()').replace(" ", "").split(',')
             data = self.df_edge.loc[(self.df_edge['BioGRID ID Interactor A'] == int(edge[0])) & (
                         self.df_edge['BioGRID ID Interactor B'] == int(edge[1]))]
-            print(data)
-            # QMessageBox.about(self, "Title", data)
+            if data.empty:
+                msg.setText("No information available")
+            else:
+                msg.setText(str(data))
+        msg.exec_()
 
 
     @staticmethod
