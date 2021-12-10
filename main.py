@@ -29,10 +29,10 @@ FILE_EDGES_PATH = None
 DEBUG = True
 
 if DEBUG:
-    #FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    #FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-    FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    #FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    #FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
 
 
 class Ui_MainWindow(object):
@@ -136,6 +136,7 @@ class Ui_MainWindow(object):
 
         self.attr_selection_list = QtWidgets.QListWidget(self.tab_attrib)
         self.attr_selection_list.setObjectName("attr_selection_list")
+        self.attr_selection_list.itemDoubleClicked.connect(lambda item: self.attr_selection_list_on_item_double_click(self.attr_selection_list.currentItem()))
         self.tab_attr_vertical_left.addWidget(self.attr_selection_list)
         self.horizontalLayout.addLayout(self.tab_attr_vertical_left)
         self.tab_attr_vertical_right = QtWidgets.QVBoxLayout()
@@ -250,11 +251,9 @@ class Ui_MainWindow(object):
         self.node_show_label_checkbox.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.node_show_label_checkbox.setObjectName("node_show_label_checkbox")
         self.horizontalLayout_6.addWidget(self.node_show_label_checkbox)
-
         spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem4)
         self.verticalLayout_2.addLayout(self.horizontalLayout_6)
-
         self.horizontalLayout_7 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_7.setObjectName("horizontalLayout_7")
         self.label_2 = QtWidgets.QLabel(self.tab_node)
@@ -643,7 +642,52 @@ class Ui_MainWindow(object):
 
     @staticmethod
     def attr_selection_list_on_item_click(item):
-        item.setHidden(True)
+        pass
+        #item.setHidden(True)
+
+    def attr_selection_list_on_item_double_click(self, item):
+        algo = item.text()
+        if algo == "Betweenness Centrality":
+            build_graph.betweenness_centrality(self.graph_current)
+
+        elif algo == "Communities": #arg
+            build_graph.find_communities(self.graph_current)
+
+        elif algo == "Clustering coefficient": #arg
+            nodes = None #TODO
+            avg = True #TODO
+            coef = build_graph.clustering_coefficient(self.graph_current, nodes, avg)
+            if avg:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Information)
+                msg.setWindowTitle("Average clustering coefficient")
+                msg.addButton(QtWidgets.QMessageBox.Close)
+                msg.setText(f"The average clustering coefficient of the graph is {coef:.5f}")
+                msg.exec_()
+            else:
+                print(coef)
+
+        elif algo == "Degree of Node": #arg
+            nodes = None  # TODO
+            avg = True  # TODO
+            degree = build_graph.degree_of_node(self.graph_current, nodes, avg)
+            if avg:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Information)
+                msg.setWindowTitle("Average degree of nodes")
+                msg.addButton(QtWidgets.QMessageBox.Close)
+                msg.setText(f"The average degree of the nodes is {degree:.5f}")
+                msg.exec_()
+            else:
+                print(degree)
+
+        elif algo == "Minimum Spanning Tree": #No argument
+            self.graph_current = build_graph.minimum_spanning_tree(self.graph_current)
+
+        elif algo == "Shortest Path": #arg
+            #source = TODO
+            #dest = TODO
+            build_graph.shortest_path(106528, 106534, self.graph_current)
 
     def node_selection_list_init(self):
         self.all_nodes_size = 1
