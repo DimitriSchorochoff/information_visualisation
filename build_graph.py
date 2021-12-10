@@ -158,8 +158,8 @@ def get_edge_width(graph, node1, node2):
     return graph[node1][node2]['width']
 
 
-def shortest_path(source, dest, graph):
-    path = nx.algorithms.shortest_path(graph, source, dest)
+def shortest_path(source, target, graph, method='dijkstra'):
+    path = nx.algorithms.shortest_path(graph, source=source, target=target, method=method)
     idx = 0
     for i in range(len(path) - 1):
         change_node_color(graph, path[idx], 'red')
@@ -189,8 +189,8 @@ def degree_of_node(graph, nodes=None, avg=False):
     return graph.degree(nodes)
 
 
-def find_communities(graph):
-    communities = community_louvain.best_partition(graph)
+def find_communities(graph, partition=None, resolution=1.0, randomize=None, random_state=None):
+    communities = community_louvain.best_partition(graph, partition=partition, resolution=resolution, randomize=randomize, random_state=random_state)
     assert isinstance(communities, dict)
     rgb = sns.color_palette(None, len(set(communities.values())))
     palette = [matplotlib.colors.to_hex(col) for col in rgb]
@@ -198,8 +198,8 @@ def find_communities(graph):
         graph.nodes[node]['color'] = palette[communities[node]]
 
 
-def betweenness_centrality(graph):
-    btw_central = nx.betweenness_centrality(graph)
+def betweenness_centrality(graph, k=None, normalized=True, endpoints=False, seed=None):
+    btw_central = nx.betweenness_centrality(graph, k=k, normalized=normalized, endpoints=endpoints, seed=seed)
     assert isinstance(btw_central, dict)
     rgb = sns.color_palette(None, len(set(btw_central.values())))
     val = list(set(btw_central.values()))
@@ -217,23 +217,16 @@ def display_data(df):
 
 
 if __name__ == "__main__":
-    #graph, df_node, df_edge = load_graph_from_csv('Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt',
-     #                                             'Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt')
+    graph, df_node, df_edge = load_graph_from_csv('Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt',
+                                                  'Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt')
 
-    nt = Network("500px", "500px")
-    nt.add_node(0, label="Node 0")
-    nt.add_node(1, label="Node 1", color="blue")
-    nt.add_node(2, label="Node 1", color="blue")
-    nt.add_edge(0, 1)
-
-    nt.show("dot.html")
     # shortest_path(107140, 108517, graph)
     # mst = minimum_spanning_tree(graph)
     # find_communities(graph)
-    # betweenness_centrality(graph)
+    betweenness_centrality(graph)
 
     # draw_graph(mst)
-    # draw_graph(graph)
+    draw_graph(graph)
     #data = df_node.loc[df_node['#BIOGRID ID'] == 106524]
     #print(data)
     #print(display_data(data))
