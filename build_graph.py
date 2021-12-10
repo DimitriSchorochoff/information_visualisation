@@ -92,20 +92,26 @@ def change_node_color(graph, node, color):
     assert isinstance(graph, nx.Graph)
     graph.nodes[node]['color'] = color
 
-def change_all_node_color(graph, color):
-    assert isinstance(graph, nx.Graph)
-    for node in graph.nodes:
-        graph.nodes[node]['color'] = color
+def change_all_node_color(graph_save, graph_current, color):
+    assert isinstance(graph_save, nx.Graph)
+    assert isinstance(graph_current, nx.Graph)
+
+    for node in graph_current.nodes:
+        graph_save.nodes[node]['color'] = color
+        graph_current.nodes[node]['color'] = color
 
 
 def change_node_size(graph, node, size):
     assert isinstance(graph, nx.Graph)
     graph.nodes[node]['size'] = size
 
-def change_all_node_size(graph, size):
-    assert isinstance(graph, nx.Graph)
-    for node in graph.nodes:
-        graph.nodes[node]['size'] = size
+def change_all_node_size(graph_save, graph_current, size):
+    assert isinstance(graph_save, nx.Graph)
+    assert isinstance(graph_current, nx.Graph)
+
+    for node in graph_current.nodes:
+        graph_current.nodes[node]['size'] = size
+        graph_save.nodes[node]['size'] = size
 
 def get_node_color(graph, node):
     assert isinstance(graph, nx.Graph)
@@ -121,20 +127,26 @@ def change_edge_color(graph, node1, node2, color):
     assert isinstance(graph, nx.Graph)
     graph[node1][node2]['color'] = color
 
-def change_all_edge_color(graph, color):
-    assert isinstance(graph, nx.Graph)
-    for node1, node2 in graph.edges:
-        graph[node1][node2]['color'] = color
+def change_all_edge_color(graph_save, graph_current, color):
+    assert isinstance(graph_save, nx.Graph)
+    assert isinstance(graph_current, nx.Graph)
+
+    for node1, node2 in graph_current.edges:
+        graph_current[node1][node2]['color'] = color
+        graph_save[node1][node2]['color'] = color
 
 
 def change_edge_width(graph, node1, node2, width):
     assert isinstance(graph, nx.Graph)
     graph[node1][node2]['width'] = width
 
-def change_all_edge_width(graph, width):
-    assert isinstance(graph, nx.Graph)
-    for node1, node2 in graph.edges:
-        graph[node1][node2]['width'] = width
+def change_all_edge_width(graph_save, graph_current, width):
+    assert isinstance(graph_save, nx.Graph)
+    assert isinstance(graph_current, nx.Graph)
+
+    for node1, node2 in graph_current.edges:
+        graph_current[node1][node2]['width'] = width
+        graph_save[node1][node2]['width'] = width
 
 def get_edge_color(graph, node1, node2):
     assert isinstance(graph, nx.Graph)
@@ -205,9 +217,16 @@ def display_data(df):
 
 
 if __name__ == "__main__":
-    graph, df_node, df_edge = load_graph_from_csv('Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt',
-                                                  'Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt')
+    #graph, df_node, df_edge = load_graph_from_csv('Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt',
+     #                                             'Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt')
 
+    nt = Network("500px", "500px")
+    nt.add_node(0, label="Node 0")
+    nt.add_node(1, label="Node 1", color="blue")
+    nt.add_node(2, label="Node 1", color="blue")
+    nt.add_edge(0, 1)
+
+    nt.show("dot.html")
     # shortest_path(107140, 108517, graph)
     # mst = minimum_spanning_tree(graph)
     # find_communities(graph)
@@ -215,6 +234,6 @@ if __name__ == "__main__":
 
     # draw_graph(mst)
     # draw_graph(graph)
-    data = df_node.loc[df_node['#BIOGRID ID'] == 106524]
+    #data = df_node.loc[df_node['#BIOGRID ID'] == 106524]
     #print(data)
-    print(display_data(data))
+    #print(display_data(data))

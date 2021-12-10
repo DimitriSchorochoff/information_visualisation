@@ -12,14 +12,16 @@ from PyQt5 import QtCore, QtWidgets,QtWebEngineWidgets
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, Qt, QSize
 import pathlib
 
-from PyQt5.QtGui import QColor
+from qtrangeslider import QLabeledRangeSlider
 from PyQt5.QtWidgets import QMessageBox, QColorDialog
 
 import build_graph
 import classes
 
 #STR
-STR_ALL_NODES = "( All nodes )"
+from qtrangeslider._labeled import EdgeLabelMode
+
+STR_ALL_NODES = "### All nodes ###"
 STR_ALL_EDGES = "### All edges ###"
 
 FILE_NODES_PATH = None
@@ -51,7 +53,8 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.splitter)
 
         self.webEngineView = QtWebEngineWidgets.QWebEngineView(self.centralwidget)
-        self.graph, self.df_node, self.df_edge = build_graph.load_graph_from_csv(FILE_NODES_PATH, FILE_EDGES_PATH)
+        self.graph_original, self.df_node, self.df_edge = build_graph.load_graph_from_csv(FILE_NODES_PATH, FILE_EDGES_PATH)
+        self.graph_current = self.graph_original.copy()
 
         #self.verticalLayout.addWidget(self.webEngineView,70)
         self.splitter.addWidget(self.webEngineView)
@@ -158,16 +161,11 @@ class Ui_MainWindow(object):
         self.attr_filter_label = QtWidgets.QLabel(self.tab_attrib)
         self.attr_filter_label.setObjectName("attr_filter_label")
         self.attr_slider_hlayout.addWidget(self.attr_filter_label)
-        self.attr_filter_min = QtWidgets.QSpinBox(self.tab_attrib)
-        self.attr_filter_min.setObjectName("attr_filter_min")
-        self.attr_slider_hlayout.addWidget(self.attr_filter_min)
-        self.attr_filter_range_slider = QtWidgets.QSlider(self.tab_attrib)
+        self.attr_filter_range_slider = QLabeledRangeSlider() #QtWidgets.QSlider(self.tab_attrib)
         self.attr_filter_range_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.attr_filter_range_slider.setEdgeLabelMode(EdgeLabelMode.NoLabel)
         self.attr_filter_range_slider.setObjectName("attr_filter_range_slider")
         self.attr_slider_hlayout.addWidget(self.attr_filter_range_slider)
-        self.attr_filter_max = QtWidgets.QSpinBox(self.tab_attrib)
-        self.attr_filter_max.setObjectName("attr_filter_max")
-        self.attr_slider_hlayout.addWidget(self.attr_filter_max)
         self.tab_attr_vertical_right.addLayout(self.attr_slider_hlayout)
         self.horizontalLayout.addLayout(self.tab_attr_vertical_right, 6)
 
@@ -486,7 +484,7 @@ class Ui_MainWindow(object):
             else:
                 current_layout = self.ui_window.list_layout[current_layout_pos]
 
-            build_graph.draw_graph(self.ui_window.graph.copy(), current_layout)
+            build_graph.draw_graph(self.ui_window.graph_current.copy(), current_layout)
             self.finished.emit()
 
     def runComputeAndDisplayGraph(self):
@@ -650,8 +648,8 @@ class Ui_MainWindow(object):
     def node_selection_list_init(self):
         self.all_nodes_size = 1
         self.all_nodes_color = "red"
-        build_graph.change_all_node_size(self.graph, self.all_nodes_size)
-        build_graph.change_all_node_color(self.graph, self.all_nodes_color)
+        build_graph.change_all_node_size(self.graph_original, self.graph_current,self.all_nodes_size)
+        build_graph.change_all_node_color(self.graph_original, self.graph_current,self.all_nodes_color)
 
         self.node_size_spinbox.setMinimum(1)
         self.node_size_spinbox.setDecimals(1)
@@ -664,19 +662,21 @@ class Ui_MainWindow(object):
     def node_selection_list_update(self):
         self.node_selection_list.clear()
         self.node_selection_list.addItem(STR_ALL_NODES)
-        for n in self.graph.nodes:
+        for n in self.graph_current.nodes:
             self.node_selection_list.addItem(str(n))
         self.node_selection_list.sortItems()
 
 
     def node_delete_from_list(self, item):
-        build_graph.remove_Node(self.graph, int(item.text()))
+        build_graph.remove_Node(self.graph_original, int(item.text()))
+        build_graph.remove_Node(self.graph_current, int(item.text()))
         self.node_selection_list_init()
 
     @staticmethod
-    def node_change_size_on_click_factory(graph, node_id):
+    def node_change_size_on_click_factory(graph_save, graph_current, node_id):
         def node_change_size_on_click(size):
-            build_graph.change_node_size(graph, node_id, size)
+            build_graph.change_node_size(graph_save, node_id, size)
+            build_graph.change_node_size(graph_current, node_id, size)
 
         return node_change_size_on_click
 
@@ -684,7 +684,7 @@ class Ui_MainWindow(object):
     def node_change_all_size_on_click_factory(ui_window):
         def node_change_all_size_on_click(size):
             ui_window.all_nodes_size = size
-            build_graph.change_all_node_size(ui_window.graph, size)
+            build_graph.change_all_node_size(ui_window.graph_original, ui_window.graph_current, size)
 
         return node_change_all_size_on_click
 
@@ -695,7 +695,8 @@ class Ui_MainWindow(object):
             color = QColorDialog.getColor()
             if color.isValid():
                 ui_window.tab_node_color_frame.setStyleSheet("background-color: {}".format(color.name()))
-                build_graph.change_node_color(ui_window.graph, node_id, color.name())
+                build_graph.change_node_color(ui_window.graph_original, node_id, color.name())
+                build_graph.change_node_color(ui_window.graph_current, node_id, color.name())
 
         return node_change_color_on_click
 
@@ -704,7 +705,7 @@ class Ui_MainWindow(object):
         if color.isValid():
             self.all_nodes_color = color.name()
             self.tab_node_color_frame.setStyleSheet("background-color: {}".format(color.name()))
-            build_graph.change_all_node_color(self.graph, color.name())
+            build_graph.change_all_node_color(self.graph_original, self.graph_current, color.name())
 
     def node_selection_list_on_item_click(self, item):
         self.node_size_spinbox.disconnect()
@@ -719,12 +720,12 @@ class Ui_MainWindow(object):
 
         else:
             node_id = int(item.text())
-            self.node_size_spinbox.setValue(build_graph.get_node_size(self.graph, node_id))
-            current_color = build_graph.get_node_color(self.graph, node_id)
+            self.node_size_spinbox.setValue(build_graph.get_node_size(self.graph_current, node_id))
+            current_color = build_graph.get_node_color(self.graph_current, node_id)
             self.tab_node_color_frame.setStyleSheet("background-color: {}".format(current_color))
 
             self.node_size_spinbox.valueChanged.connect(
-            Ui_MainWindow.node_change_size_on_click_factory(self.graph, node_id))
+            Ui_MainWindow.node_change_size_on_click_factory(self.graph_original, self.graph_current, node_id))
             self.tab_node_color_button.clicked.connect(self.node_change_color_on_click_factory(self, node_id))
 
     def node_selection_list_on_item_double_click(self, item):
@@ -743,14 +744,15 @@ class Ui_MainWindow(object):
                 msg.setText(build_graph.display_data(data))
         retVal = msg.exec_()
         if retVal != QMessageBox.Close:
-            build_graph.remove_Node(self.graph, int(item.text()))
+            build_graph.remove_Node(self.graph_original, int(item.text()))
+            build_graph.remove_Node(self.graph_current, int(item.text()))
             self.node_selection_list_init()
 
     def edge_selection_list_init(self):
         self.all_edges_size = 1
         self.all_edges_color = "black"
-        build_graph.change_all_edge_width(self.graph, self.all_edges_size)
-        build_graph.change_all_edge_color(self.graph, self.all_edges_color)
+        build_graph.change_all_edge_width(self.graph_original, self.graph_current, self.all_edges_size)
+        build_graph.change_all_edge_color(self.graph_original, self.graph_current, self.all_edges_color)
 
         self.edge_size_spinbox.setMinimum(1)
         self.edge_size_spinbox.setDecimals(1)
@@ -764,16 +766,17 @@ class Ui_MainWindow(object):
         self.edge_selection_list.clear()
         self.edge_selection_list.addItem(STR_ALL_EDGES)
 
-        for e in self.graph.edges:
+        for e in self.graph_current.edges:
             self.edge_selection_list.addItem(str(e))
 
         #self.edge_selection_list.sortItems()
 
 
     @staticmethod
-    def edge_change_size_on_click_factory(graph, node_id1, node_id2):
+    def edge_change_size_on_click_factory(graph_save, graph_current, node_id1, node_id2):
         def edge_change_size_on_click(size):
-            build_graph.change_edge_width(graph, node_id1, node_id2, size)
+            build_graph.change_edge_width(graph_save, node_id1, node_id2, size)
+            build_graph.change_edge_width(graph_current, node_id1, node_id2, size)
 
         return edge_change_size_on_click
 
@@ -781,7 +784,7 @@ class Ui_MainWindow(object):
     def edge_change_all_size_on_click_factory(ui_window):
         def edge_change_all_size_on_click(size):
             ui_window.all_edges_size = size
-            build_graph.change_all_edge_width(ui_window.graph, size)
+            build_graph.change_all_edge_width(ui_window.graph_original, ui_window.graph_current, size)
 
         return edge_change_all_size_on_click
 
@@ -792,7 +795,8 @@ class Ui_MainWindow(object):
             color = QColorDialog.getColor()
             if color.isValid():
                 ui_window.tab_edge_color_frame.setStyleSheet("background-color: {}".format(color.name()))
-                build_graph.change_edge_color(ui_window.graph, node_id1, node_id2, color.name())
+                build_graph.change_edge_color(ui_window.graph_original, node_id1, node_id2, color.name())
+                build_graph.change_edge_color(ui_window.graph_current, node_id1, node_id2, color.name())
 
         return edge_change_color_on_click
 
@@ -801,7 +805,7 @@ class Ui_MainWindow(object):
         if color.isValid():
             self.all_edges_color = color.name()
             self.tab_edge_color_frame.setStyleSheet("background-color: {}".format(color.name()))
-            build_graph.change_all_edge_color(self.graph, color.name())
+            build_graph.change_all_edge_color(self.graph_original, self.graph_current, color.name())
 
     def edge_selection_list_on_item_click(self, item):
         self.edge_size_spinbox.disconnect()
@@ -816,12 +820,12 @@ class Ui_MainWindow(object):
 
         else:
             node1, node2 = build_graph.str_tuple_2_tuple(item.text())
-            self.edge_size_spinbox.setValue(build_graph.get_edge_width(self.graph, node1, node2))
-            current_color = build_graph.get_edge_color(self.graph, node1, node2)
+            self.edge_size_spinbox.setValue(build_graph.get_edge_width(self.graph_current, node1, node2))
+            current_color = build_graph.get_edge_color(self.graph_current, node1, node2)
             self.tab_edge_color_frame.setStyleSheet("background-color: {}".format(current_color))
 
             self.edge_size_spinbox.valueChanged.connect(
-            Ui_MainWindow.edge_change_size_on_click_factory(self.graph, node1, node2))
+            Ui_MainWindow.edge_change_size_on_click_factory(self.graph_original, self.graph_current, node1, node2))
             self.tab_edge_color_button.clicked.connect(self.edge_change_color_on_click_factory(self, node1, node2))
 
     def edge_selection_list_on_item_double_click(self, item):
@@ -843,7 +847,8 @@ class Ui_MainWindow(object):
         retVal = msg.exec_()
         if retVal != QMessageBox.Close:
             edge = item.text().strip('()').replace(" ", "").split(',')
-            build_graph.remove_Edge(self.graph, int(edge[0]), int(edge[1]))
+            build_graph.remove_Edge(self.graph_original, int(edge[0]), int(edge[1]))
+            build_graph.remove_Edge(self.graph_current, int(edge[0]), int(edge[1]))
             self.edge_selection_list_init()
 
     @staticmethod
