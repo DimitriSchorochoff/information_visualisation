@@ -648,12 +648,20 @@ class Ui_MainWindow(object):
     def attr_selection_list_on_item_double_click(self, item):
         algo = item.text()
         if algo == "Betweenness Centrality":
-            build_graph.betweenness_centrality(self.graph_current)
+            k=None
+            normalized=True
+            endpoints=False
+            seed=None
+            build_graph.betweenness_centrality(self.graph_current, k, normalized, endpoints, seed)
 
-        elif algo == "Communities": #arg
-            build_graph.find_communities(self.graph_current)
+        elif algo == "Communities":
+            partition = None
+            resolution = 1.0
+            randomize = None
+            random_state = None
+            build_graph.find_communities(self.graph_current, partition, resolution, randomize, random_state)
 
-        elif algo == "Clustering coefficient": #arg
+        elif algo == "Clustering coefficient":
             nodes = None #TODO
             avg = True #TODO
             coef = build_graph.clustering_coefficient(self.graph_current, nodes, avg)
@@ -662,7 +670,7 @@ class Ui_MainWindow(object):
                 msg.setIcon(QMessageBox.Information)
                 msg.setWindowTitle("Average clustering coefficient")
                 msg.addButton(QtWidgets.QMessageBox.Close)
-                msg.setText(f"The average clustering coefficient of the graph is {coef:.5f}")
+                msg.setText(f"The average clustering coefficient of the graph is <strong>{coef:.5f}</strong>")
                 msg.exec_()
             else:
                 print(coef)
@@ -676,18 +684,19 @@ class Ui_MainWindow(object):
                 msg.setIcon(QMessageBox.Information)
                 msg.setWindowTitle("Average degree of nodes")
                 msg.addButton(QtWidgets.QMessageBox.Close)
-                msg.setText(f"The average degree of the nodes is {degree:.5f}")
+                msg.setText(f"The average degree of the nodes is <strong>{degree:.5f}</strong>")
                 msg.exec_()
             else:
                 print(degree)
 
-        elif algo == "Minimum Spanning Tree": #No argument
+        elif algo == "Minimum Spanning Tree":
             self.graph_current = build_graph.minimum_spanning_tree(self.graph_current)
 
-        elif algo == "Shortest Path": #arg
-            #source = TODO
-            #dest = TODO
-            build_graph.shortest_path(106528, 106534, self.graph_current)
+        elif algo == "Shortest Path":
+            source = 106528
+            dest = 106534
+            method = 'dijkstra'
+            build_graph.shortest_path(source, dest, self.graph_current, method)
 
     def node_selection_list_init(self):
         self.all_nodes_size = 1
