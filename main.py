@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import QMessageBox, QColorDialog
 
 import build_graph
 import classes
+import copy
 
 #STR
 from qtrangeslider._labeled import EdgeLabelMode
@@ -29,16 +30,18 @@ FILE_EDGES_PATH = None
 DEBUG = True
 
 if DEBUG:
-    FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-    #FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    #FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    #FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    #FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
 
 
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
         self.list_layout = [build_graph.LAYOUT_DEFAULT, build_graph.LAYOUT_BARNES, build_graph.LAYOUT_FORCEATLAS, build_graph.LAYOUT_REPULSION]
+        self.list_attribute = [build_graph.Attribute_numerical("Degree", 0, 100000, True)]
+
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
 
@@ -137,6 +140,7 @@ class Ui_MainWindow(object):
         self.attr_selection_list = QtWidgets.QListWidget(self.tab_attrib)
         self.attr_selection_list.setObjectName("attr_selection_list")
         self.attr_selection_list.itemDoubleClicked.connect(lambda item: self.attr_selection_list_on_item_double_click(self.attr_selection_list.currentItem()))
+        self.attr_selection_list.itemClicked.connect(self.attr_selection_list_on_item_click)
         self.tab_attr_vertical_left.addWidget(self.attr_selection_list)
         self.horizontalLayout.addLayout(self.tab_attr_vertical_left)
         self.tab_attr_vertical_right = QtWidgets.QVBoxLayout()
@@ -162,7 +166,7 @@ class Ui_MainWindow(object):
         self.attr_filter_label = QtWidgets.QLabel(self.tab_attrib)
         self.attr_filter_label.setObjectName("attr_filter_label")
         self.attr_slider_hlayout.addWidget(self.attr_filter_label)
-        self.attr_filter_range_slider = QLabeledRangeSlider() #QtWidgets.QSlider(self.tab_attrib)
+        self.attr_filter_range_slider = QLabeledRangeSlider(self.tab_attrib)
         self.attr_filter_range_slider.setOrientation(QtCore.Qt.Horizontal)
         self.attr_filter_range_slider.setEdgeLabelMode(EdgeLabelMode.NoLabel)
         self.attr_filter_range_slider.setObjectName("attr_filter_range_slider")
@@ -431,7 +435,7 @@ class Ui_MainWindow(object):
         self.node_selection_list_init()
         self.edge_selection_list_init()
         # Compute then display graph
-        self.runComputeAndDisplayGraph()
+        #self.runComputeAndDisplayGraph()
 
 
     def retranslateUi(self, MainWindow):
@@ -483,7 +487,18 @@ class Ui_MainWindow(object):
             else:
                 current_layout = self.ui_window.list_layout[current_layout_pos]
 
-            build_graph.draw_graph(self.ui_window.graph_current.copy(), current_layout)
+
+            #Filter graph
+            new_graph = self.ui_window.graph_original.copy()
+            attribute_copy = [copy.deepcopy(a) for a in self.ui_window.list_attribute]
+            for a in attribute_copy:
+                a.filter_graph(new_graph)
+
+            #We scale after filtering all element
+            for a in attribute_copy:
+                a.scale_graph(new_graph)
+
+            build_graph.draw_graph(new_graph, current_layout)
             self.finished.emit()
 
     def runComputeAndDisplayGraph(self):
@@ -630,20 +645,45 @@ class Ui_MainWindow(object):
 
 
     def attr_selection_list_init(self):
-        self.attr_selection_list.addItem("Betweenness Centrality")
-        self.attr_selection_list.addItem("Communities")
-        self.attr_selection_list.addItem("Clustering coefficient")
-        self.attr_selection_list.addItem("Degree of Node")
-        self.attr_selection_list.addItem("Minimum Spanning Tree")
-        self.attr_selection_list.addItem("Shortest Path")
+        for a in self.list_attribute:
+            self.attr_selection_list.addItem(a.name)
 
         self.attr_selection_list.setCurrentRow(0)
         self.attr_selection_list_on_item_click(self.attr_selection_list.currentItem())
 
+
     @staticmethod
-    def attr_selection_list_on_item_click(item):
-        pass
-        #item.setHidden(True)
+    def attr_numerical_scale_click_factory(attribute):
+        def attr_numerical_scale_click(bool):
+            attribute.scale_with_size = bool
+        return attr_numerical_scale_click
+
+
+    @staticmethod
+    def attr_numerical_on_slider_click_factory(attribute):
+        def attr_numerical_on_slider_click(tuple_min_max):
+            attribute.current_min_value = tuple_min_max[0]
+            attribute.current_max_value = tuple_min_max[1]
+        return attr_numerical_on_slider_click
+
+    def attr_selection_list_on_item_click(self, item):
+        attribute = None
+        for a in self.list_attribute:
+            if a.name == item.text():
+                attribute = a
+                break
+
+        if item.text() == "Degree":
+            attribute.values = self.graph_original.degree()
+            attribute.update_min_max()
+
+            self.attr_filter_range_slider.setMinimum(attribute.absolute_min_value)
+            self.attr_filter_range_slider.setMaximum(attribute.absolute_max_value)
+            self.attr_filter_range_slider.setValue((attribute.current_min_value, attribute.current_max_value))
+
+            self.attr_filter_range_slider.valueChanged.connect(Ui_MainWindow.attr_numerical_on_slider_click_factory(attribute))
+
+            self.attr_scale_with_size_checkbox.clicked.connect(Ui_MainWindow.attr_numerical_scale_click_factory(attribute))
 
     def attr_selection_list_on_item_double_click(self, item):
         algo = item.text()

@@ -220,10 +220,22 @@ if __name__ == "__main__":
     graph, df_node, df_edge = load_graph_from_csv('Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt',
                                                   'Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt')
 
+    nx = nx.Graph()#Network("500px", "500px")
+    nx.add_node(0, label="Node 0")
+    nx.add_node(1, label="Node 1", color="blue")
+    nx.add_node(2, label="Node 1", color="blue")
+    nx.add_edge(0, 1)
+
+    nx.remove_edges_from([(0,1)])
+
+
+    nt = Network('1080px', '1920px')
+    nt.from_nx(nx)
+    nt.show("dot.html")
     # shortest_path(107140, 108517, graph)
     # mst = minimum_spanning_tree(graph)
     # find_communities(graph)
-    betweenness_centrality(graph)
+    #betweenness_centrality(graph)
 
     # draw_graph(mst)
     draw_graph(graph)
