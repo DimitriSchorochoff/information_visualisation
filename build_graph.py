@@ -211,8 +211,8 @@ def betweenness_centrality(graph, k=None, normalized=True, endpoints=False, seed
 def display_data(df):
     res = ""
     for col in df.columns:
-        if str(df.iloc[0][col]) != '-':
-            res += str(col) + ": " + str(df.iloc[0][col])+"\n"
+        if str(df.iloc[0][col]) != '-' and str(df.iloc[0][col]) != 'unknown':
+            res += f"<strong>{str(col)}</strong>: {str(df.iloc[0][col])}<br>"
     return res
 
 
@@ -220,25 +220,10 @@ if __name__ == "__main__":
     graph, df_node, df_edge = load_graph_from_csv('Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt',
                                                   'Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt')
 
-    nx = nx.Graph()#Network("500px", "500px")
-    nx.add_node(0, label="Node 0")
-    nx.add_node(1, label="Node 1", color="blue")
-    nx.add_node(2, label="Node 1", color="blue")
-    nx.add_edge(0, 1)
-
-    nx.remove_edges_from([(0,1)])
-
-
-    nt = Network('1080px', '1920px')
-    nt.from_nx(nx)
-    nt.show("dot.html")
-    # shortest_path(107140, 108517, graph)
-    # mst = minimum_spanning_tree(graph)
-    # find_communities(graph)
-    #betweenness_centrality(graph)
-
-    # draw_graph(mst)
-    draw_graph(graph)
-    #data = df_node.loc[df_node['#BIOGRID ID'] == 106524]
-    #print(data)
-    #print(display_data(data))
+    df_chemicals = pd.read_csv('Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt', sep='\t')
+    df_ptm = pd.read_csv('Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt', sep='\t')
+    data1 = df_chemicals.loc[df_chemicals['BioGRID Gene ID'] == 106524]
+    #data2 = df_ptm.loc[df_ptm['BioGRID ID'] == 106524]
+    print(df_ptm['BioGRID ID'])
+    #print(display_data(data1))
+    #print(data2)
