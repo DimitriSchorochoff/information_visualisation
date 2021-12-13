@@ -57,9 +57,13 @@ class Edge:
 class Attribute:
     def __init__(self, name, type):
         self.name = name
+        self.is_init = False
         self.type = type  # Numerical = 0, Categorical = 1, Algorithm = 2
 
     def filter_graph(self, graph):
+        pass
+
+    def scale_graph(self, graph):
         pass
 
 
@@ -137,6 +141,22 @@ class Attribute_categorical(Attribute):
         self.categories_to_keep = []
         self.categories = [] #List of list of node/edge id
         self.related_to_node = related_to_node
+
+    """
+        def smooth_name_len(self):
+        len_max = 0
+        for s in self.categories_name:
+            current_len = len(s)
+            if current_len > len_max:
+                len_max = current_len
+
+        print(len_max)
+        for i in range(len(self.categories_name)):
+            len_diff = len_max - len(self.categories_name[i])
+            print(len_diff)
+            self.categories_name[i] = self.categories_name[i] + (" " * (len_diff+1)) + ":"
+            print(len(self.categories_name[i] ))
+    """
 
     def filter_graph(self, graph):
         for i in range(len(self.categories_to_keep)):

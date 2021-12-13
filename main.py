@@ -40,7 +40,7 @@ class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
         self.list_layout = [build_graph.LAYOUT_DEFAULT, build_graph.LAYOUT_BARNES, build_graph.LAYOUT_FORCEATLAS, build_graph.LAYOUT_REPULSION]
-        self.list_attribute = [build_graph.Attribute_numerical("Degree", 0, 100000, True)]
+        self.list_attribute = [build_graph.Attribute_numerical("Degree", 0, 100000, True), build_graph.Attribute_categorical("Communities", True)]
 
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
@@ -59,7 +59,6 @@ class Ui_MainWindow(object):
         self.graph_original, self.df_node, self.df_edge = build_graph.load_graph_from_csv(FILE_NODES_PATH, FILE_EDGES_PATH)
         self.graph_current = self.graph_original.copy()
 
-        #self.verticalLayout.addWidget(self.webEngineView,70)
         self.splitter.addWidget(self.webEngineView)
 
         self.main_tab_widget = QtWidgets.QTabWidget(self.centralwidget)
@@ -120,24 +119,24 @@ class Ui_MainWindow(object):
         self.main_tab_widget.addTab(self.tab_layout, "")
 
 
-        self.tab_attrib = QtWidgets.QWidget()
-        self.tab_attrib.setObjectName("tab_attrib")
-        self.horizontalLayout = QtWidgets.QHBoxLayout(self.tab_attrib)
+        self.tab_attr = QtWidgets.QWidget()
+        self.tab_attr.setObjectName("tab_attrib")
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self.tab_attr)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.tab_attr_vertical_left = QtWidgets.QVBoxLayout()
         self.tab_attr_vertical_left.setObjectName("tab_attr_vertical_left")
         self.attr_filter_attr_layout = QtWidgets.QHBoxLayout()
         self.attr_filter_attr_layout.setObjectName("attr_filter_attr_layout")
-        self.atttr_filter_attr_line_edit = QtWidgets.QLineEdit(self.tab_attrib)
+        self.atttr_filter_attr_line_edit = QtWidgets.QLineEdit(self.tab_attr)
         self.atttr_filter_attr_line_edit.setObjectName("atttr_filter_attr_line_edit")
         self.attr_filter_attr_layout.addWidget(self.atttr_filter_attr_line_edit)
-        self.attr_filter_attr_button = QtWidgets.QPushButton(self.tab_attrib)
+        self.attr_filter_attr_button = QtWidgets.QPushButton(self.tab_attr)
         self.attr_filter_attr_button.setObjectName("attr_filter_attr_button")
         self.attr_filter_attr_button.clicked.connect(lambda: self.selection_list_filter(self.attr_selection_list, self.atttr_filter_attr_line_edit.text()))
         self.attr_filter_attr_layout.addWidget(self.attr_filter_attr_button)
         self.tab_attr_vertical_left.addLayout(self.attr_filter_attr_layout, 4)
 
-        self.attr_selection_list = QtWidgets.QListWidget(self.tab_attrib)
+        self.attr_selection_list = QtWidgets.QListWidget(self.tab_attr)
         self.attr_selection_list.setObjectName("attr_selection_list")
         self.attr_selection_list.itemDoubleClicked.connect(lambda item: self.attr_selection_list_on_item_double_click(self.attr_selection_list.currentItem()))
         self.attr_selection_list.itemClicked.connect(self.attr_selection_list_on_item_click)
@@ -145,15 +144,11 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addLayout(self.tab_attr_vertical_left)
         self.tab_attr_vertical_right = QtWidgets.QVBoxLayout()
         self.tab_attr_vertical_right.setObjectName("tab_attr_vertical_right")
-        self.label = QtWidgets.QLabel(self.tab_attrib)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy)
-        self.label.setObjectName("label")
-        self.tab_attr_vertical_right.addWidget(self.label)
+
+        #Numerical widget
         self.attr_scale_with_size_hlayout = QtWidgets.QHBoxLayout()
         self.attr_scale_with_size_hlayout.setObjectName("attr_scale_with_size_hlayout")
-        self.attr_scale_with_size_checkbox = QtWidgets.QCheckBox(self.tab_attrib)
+        self.attr_scale_with_size_checkbox = QtWidgets.QCheckBox(self.tab_attr)
         self.attr_scale_with_size_checkbox.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.attr_scale_with_size_checkbox.setObjectName("attr_scale_with_size_checkbox")
         self.attr_scale_with_size_hlayout.addWidget(self.attr_scale_with_size_checkbox)
@@ -163,28 +158,47 @@ class Ui_MainWindow(object):
         self.tab_attr_vertical_right.addLayout(self.attr_scale_with_size_hlayout)
         self.attr_slider_hlayout = QtWidgets.QHBoxLayout()
         self.attr_slider_hlayout.setObjectName("attr_slider_hlayout")
-        self.attr_filter_label = QtWidgets.QLabel(self.tab_attrib)
+        self.attr_filter_label = QtWidgets.QLabel(self.tab_attr)
         self.attr_filter_label.setObjectName("attr_filter_label")
         self.attr_slider_hlayout.addWidget(self.attr_filter_label)
-        self.attr_filter_range_slider = QLabeledRangeSlider(self.tab_attrib)
+        self.attr_filter_range_slider = QLabeledRangeSlider(self.tab_attr)
         self.attr_filter_range_slider.setOrientation(QtCore.Qt.Horizontal)
         self.attr_filter_range_slider.setEdgeLabelMode(EdgeLabelMode.NoLabel)
         self.attr_filter_range_slider.setObjectName("attr_filter_range_slider")
         self.attr_slider_hlayout.addWidget(self.attr_filter_range_slider)
         self.tab_attr_vertical_right.addLayout(self.attr_slider_hlayout)
+
+        #Categorical widget
+        self.attr_cat_layout = QtWidgets.QVBoxLayout()
+        self.attr_cat_layout.setObjectName("attrib_cat_layout")
+        self.attr_cat_layout_widget_lst = []
+
+        self.attr_cat_widgets = QtWidgets.QWidget()
+        self.attr_cat_widgets.setLayout(self.attr_cat_layout)
+
+        self.attr_scroll_area = QtWidgets.QScrollArea()
+        self.attr_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.attr_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.attr_scroll_area.setWidgetResizable(True)
+        self.attr_scroll_area.setWidget(self.attr_cat_widgets)
+        self.attr_scroll_area.setVisible(False)
+
+        self.tab_attr_vertical_right.addWidget(self.attr_scroll_area, 6)
+
         self.horizontalLayout.addLayout(self.tab_attr_vertical_right, 6)
 
-        self.attrib_build_button = QtWidgets.QPushButton(self.tab_layout)
-        self.attrib_build_button.setObjectName("attrib_build_button")
+
+        self.attr_build_button = QtWidgets.QPushButton(self.tab_layout)
+        self.attr_build_button.setObjectName("attrib_build_button")
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.attrib_build_button.sizePolicy().hasHeightForWidth())
-        self.attrib_build_button.setSizePolicy(sizePolicy)
-        self.attrib_build_button.clicked.connect(self.runComputeAndDisplayGraph)
-        self.horizontalLayout.addWidget(self.attrib_build_button, 1)
+        sizePolicy.setHeightForWidth(self.attr_build_button.sizePolicy().hasHeightForWidth())
+        self.attr_build_button.setSizePolicy(sizePolicy)
+        self.attr_build_button.clicked.connect(self.runComputeAndDisplayGraph)
+        self.horizontalLayout.addWidget(self.attr_build_button, 1)
 
-        self.main_tab_widget.addTab(self.tab_attrib, "")
+        self.main_tab_widget.addTab(self.tab_attr, "")
 
 
         self.tab_node = QtWidgets.QWidget()
@@ -222,13 +236,16 @@ class Ui_MainWindow(object):
         self.tab_node_color_hlayout = QtWidgets.QHBoxLayout(self.tab_node)
         self.tab_node_color_hlayout.setObjectName("tab_node_color_hlayout")
 
+
+        self.tab_node_color_label = QtWidgets.QLabel()
+        self.tab_node_color_label.setObjectName("tab_node_color_label")
+        self.tab_node_color_hlayout.addWidget(self.tab_node_color_label)
+
         self.tab_node_color_button = QtWidgets.QPushButton()
         self.tab_node_color_button.setObjectName("tab_node_color_button")
+        self.tab_node_color_button.setFlat(True)
         self.tab_node_color_hlayout.addWidget(self.tab_node_color_button)
         self.verticalLayout_3.addLayout(self.tab_node_color_hlayout)
-
-        self.tab_node_color_frame = QtWidgets.QFrame(self.tab_node)
-        self.tab_node_color_hlayout.addWidget(self.tab_node_color_frame)
 
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
@@ -444,14 +461,14 @@ class Ui_MainWindow(object):
         self.layout_filter_button.setText(_translate("MainWindow", "Filter"))
         self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.tab_layout), _translate("MainWindow", "Layout"))
         self.attr_filter_attr_button.setText(_translate("MainWindow", "Filter"))
-        self.label.setText(_translate("MainWindow", "Color incoming"))
         self.attr_scale_with_size_checkbox.setText(_translate("MainWindow", "Scale with size"))
         self.attr_filter_label.setText(_translate("MainWindow", "Filter"))
-        self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.tab_attrib), _translate("MainWindow", "Attribute"))
+        self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.tab_attr), _translate("MainWindow", "Attribute"))
         self.node_filter_button.setText(_translate("MainWindow", "Filter"))
         self.edge_filter_button.setText(_translate("MainWindow", "Filter"))
-        self.tab_node_color_button.setText(_translate("MainWindow", "Pick a color"))
-        self.tab_edge_color_button.setText(_translate("MainWindow", "Pick a color"))
+        self.tab_node_color_button.setText(_translate("MainWindow", " "))
+        self.tab_node_color_label.setText(_translate("MainWindow", "Pick a color: "))
+        self.tab_edge_color_button.setText(_translate("MainWindow", "Pick a color: "))
         self.label_4.setText(_translate("MainWindow", "Node size"))
         self.edge_label_4.setText(_translate("MainWindow", "Edge size"))
         #self.node_show_label_checkbox.setText(_translate("MainWindow", "Show label"))
@@ -462,7 +479,7 @@ class Ui_MainWindow(object):
         #self.edge_label_3.setText(_translate("MainWindow", "Label font"))
 
         self.layout_build_button.setText(_translate("MainWindow", "Build"))
-        self.attrib_build_button.setText(_translate("MainWindow", "Build"))
+        self.attr_build_button.setText(_translate("MainWindow", "Build"))
         self.edge_build_button.setText(_translate("MainWindow", "Build"))
         self.node_build_button.setText(_translate("MainWindow", "Build"))
 
@@ -521,8 +538,8 @@ class Ui_MainWindow(object):
         self.layout_build_button.setText("Building")
         self.layout_build_button.setEnabled(False)
 
-        self.attrib_build_button.setText("Building")
-        self.attrib_build_button.setEnabled(False)
+        self.attr_build_button.setText("Building")
+        self.attr_build_button.setEnabled(False)
 
         self.edge_build_button.setText("Building")
         self.edge_build_button.setEnabled(False)
@@ -537,8 +554,8 @@ class Ui_MainWindow(object):
         self.layout_build_button.setText("Build")
         self.layout_build_button.setEnabled(True)
 
-        self.attrib_build_button.setText("Build")
-        self.attrib_build_button.setEnabled(True)
+        self.attr_build_button.setText("Build")
+        self.attr_build_button.setEnabled(True)
 
         self.edge_build_button.setText("Build")
         self.edge_build_button.setEnabled(True)
@@ -666,6 +683,24 @@ class Ui_MainWindow(object):
             attribute.current_max_value = tuple_min_max[1]
         return attr_numerical_on_slider_click
 
+    @staticmethod
+    def attrib_cat_boolean_on_click_factory(attrib_cat, i):
+        def attrib_cat_boolean_on_click(boolean):
+            attrib_cat.categories_to_keep[i] = boolean
+
+        return attrib_cat_boolean_on_click
+
+    @staticmethod
+    def attrib_cat_color_on_click_factory(attrib_cat, i, qbutton):
+        def attrib_cat_color_on_click():
+            color = QColorDialog.getColor()
+            if color.isValid():
+                attrib_cat.categories_color[i] = color.name()
+                qbutton.setStyleSheet("background-color: {}; border:  none".format(color.name()))
+
+        return attrib_cat_color_on_click
+
+
     def attr_selection_list_on_item_click(self, item):
         attribute = None
         for a in self.list_attribute:
@@ -674,8 +709,10 @@ class Ui_MainWindow(object):
                 break
 
         if item.text() == "Degree":
-            attribute.values = self.graph_original.degree()
-            attribute.update_min_max()
+            if not attribute.is_init:
+                attribute.values = self.graph_original.degree()
+                attribute.update_min_max()
+                attribute.is_init = True
 
             self.attr_filter_range_slider.setMinimum(attribute.absolute_min_value)
             self.attr_filter_range_slider.setMaximum(attribute.absolute_max_value)
@@ -684,6 +721,74 @@ class Ui_MainWindow(object):
             self.attr_filter_range_slider.valueChanged.connect(Ui_MainWindow.attr_numerical_on_slider_click_factory(attribute))
 
             self.attr_scale_with_size_checkbox.clicked.connect(Ui_MainWindow.attr_numerical_scale_click_factory(attribute))
+
+        elif item.text() == "Communities":
+            if not attribute.is_init:
+                build_graph.find_communities(self.graph_original, attribute)
+                attribute.is_init = True
+
+
+
+        # Set attrib layout
+        self.reset_attrib_layout()
+        if attribute.type == 0:
+            self.set_attrib_layout_numerical(attribute)
+        elif attribute.type == 1:
+            self.set_attrib_layout_categorical(attribute)
+
+
+    def reset_attrib_layout(self):
+        self.attr_filter_range_slider.setVisible(False)
+        self.attr_filter_label.setVisible(False)
+        self.attr_scale_with_size_checkbox.setVisible(False)
+        self.attr_scroll_area.setVisible(False)
+
+        for w in self.attr_cat_layout_widget_lst:
+            for i in reversed(range(w.count())):
+                w.removeWidget(w.itemAt(i).widget())
+
+            self.attr_cat_layout.removeItem(w)
+
+        self.attr_cat_layout_widget_lst = []
+
+    def set_attrib_layout_numerical(self, attrib):
+        self.attr_filter_range_slider.setVisible(True)
+        self.attr_filter_label.setVisible(True)
+        self.attr_scale_with_size_checkbox.setVisible(True)
+
+    def set_attrib_layout_categorical(self, attrib):
+        self.attr_scroll_area.setVisible(True)
+
+        for i in range(len(attrib.categories)):
+            mini_hlayout = QtWidgets.QHBoxLayout()
+
+            label = QtWidgets.QLabel(self.tab_attr)
+            label.setObjectName("Label_{}".format(attrib.categories_name[i]))
+            label.setText("{} ".format(attrib.categories_name[i]))
+            mini_hlayout.addWidget(label, 70)
+
+            checkbox = QtWidgets.QCheckBox(self.tab_attr)
+            checkbox.setObjectName("Checkbox_{}".format(attrib.categories_name[i]))
+            checkbox.setChecked(attrib.categories_to_keep[i])
+            checkbox.clicked.connect(Ui_MainWindow.attrib_cat_boolean_on_click_factory(attrib, i))
+            mini_hlayout.addWidget(checkbox, 10)
+
+            color_button = QtWidgets.QPushButton(self.tab_attr)
+            color_button.setObjectName("color_button{}".format(attrib.categories_name[i]))
+            color_button.setFlat(True)
+            color_button.setText(" ")
+            color_button.setStyleSheet("background-color: {}; border:  none".format(attrib.categories_color[i]))
+            color_button.clicked.connect(Ui_MainWindow.attrib_cat_color_on_click_factory(attrib, i, color_button))
+            mini_hlayout.addWidget(color_button, 20)
+
+            self.attr_cat_layout.addLayout(mini_hlayout)
+            self.attr_cat_layout_widget_lst.append(mini_hlayout)
+
+
+
+
+
+
 
     def attr_selection_list_on_item_double_click(self, item):
         algo = item.text()
@@ -787,7 +892,7 @@ class Ui_MainWindow(object):
         def node_change_color_on_click():
             color = QColorDialog.getColor()
             if color.isValid():
-                ui_window.tab_node_color_frame.setStyleSheet("background-color: {}".format(color.name()))
+                ui_window.tab_node_color_button.setStyleSheet("background-color: {}; border:  none".format(color.name()))
                 build_graph.change_node_color(ui_window.graph_original, node_id, color.name())
                 build_graph.change_node_color(ui_window.graph_current, node_id, color.name())
 
@@ -797,7 +902,7 @@ class Ui_MainWindow(object):
         color = QColorDialog.getColor()
         if color.isValid():
             self.all_nodes_color = color.name()
-            self.tab_node_color_frame.setStyleSheet("background-color: {}".format(color.name()))
+            self.tab_node_color_button.setStyleSheet("background-color: {}; border:  none".format(color.name()))
             build_graph.change_all_node_color(self.graph_original, self.graph_current, color.name())
 
     def node_selection_list_on_item_click(self, item):
@@ -806,20 +911,20 @@ class Ui_MainWindow(object):
 
         if item.text() == STR_ALL_NODES:
             self.node_size_spinbox.setValue(self.all_nodes_size)
-            self.tab_node_color_frame.setStyleSheet("background-color: {}".format(self.all_nodes_color))
 
             self.node_size_spinbox.valueChanged.connect(Ui_MainWindow.node_change_all_size_on_click_factory(self))
             self.tab_node_color_button.clicked.connect(self.node_change_all_color_on_click)
+            self.tab_node_color_button.setStyleSheet("background-color: {}; border:  none".format(self.all_nodes_color))
 
         else:
             node_id = int(item.text())
             self.node_size_spinbox.setValue(build_graph.get_node_size(self.graph_current, node_id))
             current_color = build_graph.get_node_color(self.graph_current, node_id)
-            self.tab_node_color_frame.setStyleSheet("background-color: {}".format(current_color))
 
             self.node_size_spinbox.valueChanged.connect(
             Ui_MainWindow.node_change_size_on_click_factory(self.graph_original, self.graph_current, node_id))
             self.tab_node_color_button.clicked.connect(self.node_change_color_on_click_factory(self, node_id))
+            self.tab_node_color_button.setStyleSheet("background-color: {}; border:  none".format(current_color))
 
     def node_selection_list_on_item_double_click(self, item):
         msg = QMessageBox()
@@ -887,7 +992,7 @@ class Ui_MainWindow(object):
         def edge_change_color_on_click():
             color = QColorDialog.getColor()
             if color.isValid():
-                ui_window.tab_edge_color_frame.setStyleSheet("background-color: {}".format(color.name()))
+                ui_window.tab_node_color_button.setStyleSheet("background-color: {}; border:  none".format(color.name()))
                 build_graph.change_edge_color(ui_window.graph_original, node_id1, node_id2, color.name())
                 build_graph.change_edge_color(ui_window.graph_current, node_id1, node_id2, color.name())
 
@@ -897,7 +1002,7 @@ class Ui_MainWindow(object):
         color = QColorDialog.getColor()
         if color.isValid():
             self.all_edges_color = color.name()
-            self.tab_edge_color_frame.setStyleSheet("background-color: {}".format(color.name()))
+            self.tab_node_color_button.setStyleSheet("background-color: {}; border:  none".format(color.name()))
             build_graph.change_all_edge_color(self.graph_original, self.graph_current, color.name())
 
     def edge_selection_list_on_item_click(self, item):

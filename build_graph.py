@@ -188,7 +188,7 @@ def degree_of_node(graph, nodes=None, avg=False):
     # nodes can be an int or a list of int
     return graph.degree(nodes)
 
-
+"""
 def find_communities(graph, partition=None, resolution=1.0, randomize=None, random_state=None):
     communities = community_louvain.best_partition(graph, partition=partition, resolution=resolution, randomize=randomize, random_state=random_state)
     assert isinstance(communities, dict)
@@ -196,6 +196,24 @@ def find_communities(graph, partition=None, resolution=1.0, randomize=None, rand
     palette = [matplotlib.colors.to_hex(col) for col in rgb]
     for node in communities.keys():
         graph.nodes[node]['color'] = palette[communities[node]]
+ """
+
+def find_communities(graph, attrib_cat, partition=None, resolution=1.0, randomize=None, random_state=None):
+    #assert isinstance(attrib_cat, Attribute_categorical)
+    communities = community_louvain.best_partition(graph, partition=partition, resolution=resolution, randomize=randomize, random_state=random_state)
+    assert isinstance(communities, dict)
+
+    n_commu = len(set(communities.values()))
+
+    attrib_cat.categories = [[] for i in range(n_commu)]
+    for node, commu in communities.items():
+        attrib_cat.categories[commu].append(node)
+    attrib_cat.categories.sort(reverse=True, key=len)
+
+    attrib_cat.categories_name = ["Community {} (size: {})".format(i+1, len(attrib_cat.categories[i])) for i in range(n_commu)]
+    rgb = sns.color_palette(None, len(set(communities.values())))
+    attrib_cat.categories_color = [matplotlib.colors.to_hex(col) for col in rgb]
+    attrib_cat.categories_to_keep = [True for i in range(n_commu)]
 
 
 def betweenness_centrality(graph, k=None, normalized=True, endpoints=False, seed=None):
