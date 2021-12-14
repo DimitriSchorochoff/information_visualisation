@@ -283,16 +283,19 @@ class Ui_MainWindow(object):
 
         spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem2)
-        ###########################
+
+        self.horizontalLayout_radio = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_radio.setObjectName("horizontalLayout_radio")
         self.node_radio1 = QRadioButton('General information')
         self.node_radio2 = QRadioButton('Chemicals information')
         self.node_radio3 = QRadioButton('PTM information')
-        self.horizontalLayout_4.addWidget(self.node_radio1)
-        self.horizontalLayout_4.addWidget(self.node_radio2)
-        self.horizontalLayout_4.addWidget(self.node_radio3)
+        self.horizontalLayout_radio.addWidget(self.node_radio1)
+        self.horizontalLayout_radio.addWidget(self.node_radio2)
+        self.horizontalLayout_radio.addWidget(self.node_radio3)
         self.node_radio1.setChecked(True)
-        ############################
+
         self.verticalLayout_3.addLayout(self.horizontalLayout_4)
+        self.verticalLayout_3.addLayout(self.horizontalLayout_radio)
 
         spacerItem3 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_3.addItem(spacerItem3)
