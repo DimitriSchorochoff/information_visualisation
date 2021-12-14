@@ -74,6 +74,8 @@ class Attribute_numerical(Attribute):
         self.absolute_max_value = max_value
         self.current_min_value = min_value
         self.current_max_value = max_value
+        self._filtered_max_value = max_value
+        self._filtered_min_value = min_value
         self.related_to_node = related_to_node
 
         self.values = []
@@ -96,17 +98,26 @@ class Attribute_numerical(Attribute):
         self.current_max_value = self.absolute_max_value
 
     def normalize_value(self, value):
-        return (value - self.absolute_min_value) / self.absolute_max_value
+        return (value - self._filtered_min_value) / self._filtered_max_value
 
     def filter_graph(self, graph):
         if self.absolute_min_value == self.current_min_value and self.absolute_max_value == self.current_max_value:
             return
+
+        # Compute new min and max value after the filter to have proper normalization
+        self._filtered_min_value = self.absolute_max_value
+        self._filtered_max_value = self.absolute_min_value
 
         if self.related_to_node:
             nodes_to_remove = []
             for n in graph.nodes:
                 if ( self.values[n] < self.current_min_value ) or ( self.current_max_value < self.values[n] ):
                     nodes_to_remove.append(n)
+                else:
+                    if self.values[n] > self._filtered_max_value:
+                        self._filtered_max_value = self.values[n]
+                    if self.values[n] < self._filtered_min_value:
+                        self._filtered_min_value = self.values[n]
 
             graph.remove_nodes_from(nodes_to_remove)
 
@@ -115,6 +126,11 @@ class Attribute_numerical(Attribute):
             for a, b in graph.edges:
                 if ( self.values[a][b] < self.current_min_value ) or ( self.current_max_value < self.values[a][b] ):
                     edges_to_remove.append((a, b))
+                else:
+                    if self.values[a][b] > self._filtered_max_value:
+                        self._filtered_max_value = self.values[a][b]
+                    elif self.values[a][b] < self._filtered_min_value:
+                        self._filtered_min_value = self.values[a][b]
 
             graph.remove_edges_from(edges_to_remove)
 

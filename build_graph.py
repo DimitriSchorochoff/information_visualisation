@@ -92,25 +92,21 @@ def change_node_color(graph, node, color):
     assert isinstance(graph, nx.Graph)
     graph.nodes[node]['color'] = color
 
-def change_all_node_color(graph_save, graph_current, color):
+def change_all_node_color(graph_save, color):
     assert isinstance(graph_save, nx.Graph)
-    assert isinstance(graph_current, nx.Graph)
 
-    for node in graph_current.nodes:
+    for node in graph_save.nodes:
         graph_save.nodes[node]['color'] = color
-        graph_current.nodes[node]['color'] = color
 
 
 def change_node_size(graph, node, size):
     assert isinstance(graph, nx.Graph)
     graph.nodes[node]['size'] = size
 
-def change_all_node_size(graph_save, graph_current, size):
+def change_all_node_size(graph_save, size):
     assert isinstance(graph_save, nx.Graph)
-    assert isinstance(graph_current, nx.Graph)
 
-    for node in graph_current.nodes:
-        graph_current.nodes[node]['size'] = size
+    for node in graph_save.nodes:
         graph_save.nodes[node]['size'] = size
 
 def get_node_color(graph, node):
@@ -127,12 +123,10 @@ def change_edge_color(graph, node1, node2, color):
     assert isinstance(graph, nx.Graph)
     graph[node1][node2]['color'] = color
 
-def change_all_edge_color(graph_save, graph_current, color):
+def change_all_edge_color(graph_save, color):
     assert isinstance(graph_save, nx.Graph)
-    assert isinstance(graph_current, nx.Graph)
 
-    for node1, node2 in graph_current.edges:
-        graph_current[node1][node2]['color'] = color
+    for node1, node2 in graph_save.edges:
         graph_save[node1][node2]['color'] = color
 
 
@@ -140,12 +134,10 @@ def change_edge_width(graph, node1, node2, width):
     assert isinstance(graph, nx.Graph)
     graph[node1][node2]['width'] = width
 
-def change_all_edge_width(graph_save, graph_current, width):
+def change_all_edge_width(graph_save, width):
     assert isinstance(graph_save, nx.Graph)
-    assert isinstance(graph_current, nx.Graph)
 
-    for node1, node2 in graph_current.edges:
-        graph_current[node1][node2]['width'] = width
+    for node1, node2 in graph_save.edges:
         graph_save[node1][node2]['width'] = width
 
 def get_edge_color(graph, node1, node2):
@@ -198,7 +190,7 @@ def find_communities(graph, partition=None, resolution=1.0, randomize=None, rand
         graph.nodes[node]['color'] = palette[communities[node]]
  """
 
-def find_communities(graph, attrib_cat, partition=None, resolution=1.0, randomize=None, random_state=None):
+def find_communities(graph, attrib_cat, partition=None, resolution=1.0, randomize=None, random_state=42):
     #assert isinstance(attrib_cat, Attribute_categorical)
     communities = community_louvain.best_partition(graph, partition=partition, resolution=resolution, randomize=randomize, random_state=random_state)
     assert isinstance(communities, dict)
