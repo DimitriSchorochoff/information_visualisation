@@ -1055,7 +1055,24 @@ class Ui_MainWindow(object):
             self.data1 = self.df_node.loc[self.df_node['#BIOGRID ID'] == int(item.text())]
             self.data2 = self.df_chemicals.loc[self.df_chemicals['BioGRID Gene ID'] == int(item.text())]
             self.data3 = self.df_ptm.loc[self.df_ptm['BioGRID ID'] == int(item.text())]
-            self.data4 = "test"
+            self.data4 = ""
+            for attribute in self.list_attribute:
+                if attribute.is_init:
+                    self.data4 += f"<strong>{attribute.name}:</strong> "
+                    if attribute.type == 0: #Numerical
+                        inter = attribute.values.get(int(item.text()),-1)
+                        if inter != -1:
+                            self.data4 += f"{inter}<br>"
+                    elif attribute.type == 1: #Categorical
+                        index = -1
+                        for i in range(len(attribute.categories)):
+                            for j in range(len(attribute.categories[i])):
+                                if attribute.categories[i][j] == int(item.text()):
+                                    index = i
+                                    break
+                        if index != -1:
+                            self.data4 += f"{attribute.categories_name[index]}<br>"
+
             tab_dialog = TabDialog(self)
             tab_dialog.exec_()
         """else:
