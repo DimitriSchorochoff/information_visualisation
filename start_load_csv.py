@@ -15,7 +15,6 @@ import pathlib
 
 
 class Ui_MainWindow(QDialog):
-
     DEFAULT_FILE_SELECTED_STRING = "File selected:"
     MAX_SIZE_FILE_DISPLAY = 45
 
@@ -23,7 +22,7 @@ class Ui_MainWindow(QDialog):
     LABEL_WIDTH_RATIO = 10 - BUTTON_WIDTH_RATIO
 
     def open_main(self):
-        if (main.FILE_NODES_PATH is None) or (main.FILE_EDGES_PATH is None):
+        if (main.FILE_NODES_PATH is None) or (main.FILE_EDGES_PATH is None) or (main.FILE_CHEMICALS_PATH is None) or (main.FILE_PTM_PATH is None):
             return
 
         self.window = QtWidgets.QMainWindow()
@@ -35,8 +34,9 @@ class Ui_MainWindow(QDialog):
 
     def on_click_select_nodes_file(self):
         curr_dir = str(pathlib.Path(pathlib.Path(__file__).parent.resolve()))
-        path = QFileDialog.getOpenFileName(self, "Select nodes .csv or .txt file", curr_dir, "CSV files (*.csv), TXT files (*.txt)")
-        if path is None: return # On cancel
+        path = QFileDialog.getOpenFileName(self, "Select nodes .csv or .txt file", curr_dir,
+                                           "CSV files (*.csv), TXT files (*.txt)")
+        if path is None: return  # On cancel
 
         path = path[0]
         main.FILE_NODES_PATH = path
@@ -44,18 +44,40 @@ class Ui_MainWindow(QDialog):
 
     def on_click_select_edges_file(self):
         curr_dir = str(pathlib.Path(pathlib.Path(__file__).parent.resolve()))
-        path = QFileDialog.getOpenFileName(self, "Select edges .csv or .txt file", curr_dir, "CSV files (*.csv), TXT files (*.txt)")
-        if path is None: return # On cancel
+        path = QFileDialog.getOpenFileName(self, "Select edges .csv or .txt file", curr_dir,
+                                           "CSV files (*.csv), TXT files (*.txt)")
+        if path is None: return  # On cancel
 
         path = path[0]
         main.FILE_EDGES_PATH = path
         self.label_2.setText("{} {}".format(self.DEFAULT_FILE_SELECTED_STRING, path[:self.MAX_SIZE_FILE_DISPLAY]))
 
+    def on_click_select_chemicals_file(self):
+        curr_dir = str(pathlib.Path(pathlib.Path(__file__).parent.resolve()))
+        path = QFileDialog.getOpenFileName(self, "Select nodes .csv or .txt file", curr_dir,
+                                           "CSV files (*.csv), TXT files (*.txt)")
+        if path is None: return  # On cancel
+
+        path = path[0]
+        main.FILE_CHEMICALS_PATH = path
+        self.label_3.setText("{} {}".format(self.DEFAULT_FILE_SELECTED_STRING, path[:self.MAX_SIZE_FILE_DISPLAY]))
+
+    def on_click_select_ptm_file(self):
+        curr_dir = str(pathlib.Path(pathlib.Path(__file__).parent.resolve()))
+        path = QFileDialog.getOpenFileName(self, "Select nodes .csv or .txt file", curr_dir,
+                                           "CSV files (*.csv), TXT files (*.txt)")
+        if path is None: return  # On cancel
+
+        path = path[0]
+        main.FILE_PTM_PATH = path
+        self.label_4.setText("{} {}".format(self.DEFAULT_FILE_SELECTED_STRING, path[:self.MAX_SIZE_FILE_DISPLAY]))
 
     def setupUi(self, MainWindow):
-        #Set default value
+        # Set default value
         main.FILE_NODES_PATH = None
         main.FILE_EDGES_PATH = None
+        main.FILE_CHEMICALS_PATH = None
+        main.FILE_PTM_PATH = None
 
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 610)
@@ -107,9 +129,41 @@ class Ui_MainWindow(QDialog):
         self.label_2.installEventFilter(self)
         self.horizontalLayout_3.addWidget(self.label_2, self.LABEL_WIDTH_RATIO)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
-        spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self.verticalLayout.addItem(spacerItem2)
-        
+
+        self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_4.setObjectName("horizontalLayout_4")
+
+        self.pushButton_4 = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_4.setObjectName("pushButton_4")
+        self.pushButton_4.clicked.connect(self.on_click_select_chemicals_file)
+        self.horizontalLayout_4.addWidget(self.pushButton_4, self.BUTTON_WIDTH_RATIO)
+
+        self.label_3 = QtWidgets.QLabel(self.centralwidget)
+        self.label_3.setObjectName("label_3")
+        self.horizontalLayout_4.addWidget(self.label_3, self.LABEL_WIDTH_RATIO)
+        self.verticalLayout.addLayout(self.horizontalLayout_4)
+
+        spacerItem3 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.verticalLayout.addItem(spacerItem3)
+        ###
+        self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
+
+        self.pushButton_5 = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_5.setObjectName("pushButton_5")
+        self.pushButton_5.clicked.connect(self.on_click_select_ptm_file)
+        self.horizontalLayout_5.addWidget(self.pushButton_5, self.BUTTON_WIDTH_RATIO)
+
+        self.label_4 = QtWidgets.QLabel(self.centralwidget)
+        self.label_4.setObjectName("label_4")
+        self.horizontalLayout_5.addWidget(self.label_4, self.LABEL_WIDTH_RATIO)
+        self.verticalLayout.addLayout(self.horizontalLayout_5)
+
+        spacerItem4 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem4)
+
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setObjectName("pushButton")
         self.pushButton.clicked.connect(self.open_main)
@@ -136,11 +190,16 @@ class Ui_MainWindow(QDialog):
         self.label.setText(_translate("MainWindow", self.DEFAULT_FILE_SELECTED_STRING))
         self.pushButton_3.setText(_translate("MainWindow", "Select edges file"))
         self.label_2.setText(_translate("MainWindow", self.DEFAULT_FILE_SELECTED_STRING))
+        self.pushButton_4.setText(_translate("MainWindow", "Select chemicals file"))
+        self.label_3.setText(_translate("MainWindow", self.DEFAULT_FILE_SELECTED_STRING))
+        self.pushButton_5.setText(_translate("MainWindow", "Select PTM file"))
+        self.label_4.setText(_translate("MainWindow", self.DEFAULT_FILE_SELECTED_STRING))
         self.pushButton.setText(_translate("MainWindow", "Build graph"))
 
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
     MainWindow = QtWidgets.QMainWindow()
