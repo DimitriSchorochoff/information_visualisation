@@ -31,14 +31,14 @@ FILE_PTM_PATH = None
 DEBUG = True
 
 if DEBUG:
-    # FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    # FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-    # FILE_CHEMICALS_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
-    # FILE_PTM_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
-    FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-    FILE_CHEMICALS_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
-    FILE_PTM_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
+    FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    FILE_CHEMICALS_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
+    FILE_PTM_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
+    #FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    #FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    #FILE_CHEMICALS_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
+    #FILE_PTM_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
 
 
 class Ui_MainWindow(object):
@@ -1028,6 +1028,12 @@ class Ui_MainWindow(object):
         if item.text() == STR_ALL_NODES:
             msg.setText("APPLY TO ALL NODES")
         else:
+            data1 = self.df_node.loc[self.df_node['#BIOGRID ID'] == int(item.text())]
+            data2 = self.df_chemicals.loc[self.df_chemicals['BioGRID Gene ID'] == int(item.text())]
+            data3 = self.df_ptm.loc[self.df_ptm['BioGRID ID'] == int(item.text())]
+            tab_dialog = TabDialog(data1,data2,data3)
+            tab_dialog.exec_()
+        """else:
             msg.addButton('Delete node', QtWidgets.QMessageBox.YesRole)
             if self.node_radio1.isChecked():
                 data = self.df_node.loc[self.df_node['#BIOGRID ID'] == int(item.text())]
@@ -1042,7 +1048,7 @@ class Ui_MainWindow(object):
         retVal = msg.exec_()
         if retVal != QMessageBox.Close:
             build_graph.remove_Node(self.graph_current, int(item.text()))
-            self.node_selection_list_update()
+            self.node_selection_list_update()"""
 
     def edge_selection_list_init(self):
         self.all_edges_size = 1
@@ -1152,6 +1158,50 @@ class Ui_MainWindow(object):
             item = selection_list.item(i)
             item.setHidden(filtering_str != item.text()[:len(filtering_str)])
 
+class TabDialog(QtWidgets.QDialog):
+    def __init__(self, text1, text2, text3, parent=None):
+        super(TabDialog, self).__init__(parent)
+
+        self.tabWidget = QtWidgets.QTabWidget()
+        self.tab1 = QtWidgets.QWidget()
+        self.label1 = QtWidgets.QLabel(self.tab1)
+        if text1.empty:
+            self.label1.setText("No information available")
+        else:
+            self.label1.setText(build_graph.display_data(text1))
+        self.tab1.resize(self.tab1.sizeHint())
+
+        self.tab2 = QtWidgets.QWidget()
+        self.label2 = QtWidgets.QLabel(self.tab2)
+        if text2.empty:
+            self.label2.setText("No information available")
+        else:
+            self.label2.setText(build_graph.display_data(text2))
+        self.tab2.resize(self.tab2.sizeHint())
+
+        self.tab3 = QtWidgets.QWidget()
+        self.label3 = QtWidgets.QLabel(self.tab3)
+        if text3.empty:
+            self.label3.setText("No information available")
+        else:
+            self.label3.setText(build_graph.display_data(text3))
+        self.tab3.resize(self.tab3.sizeHint())
+
+        self.tabWidget.addTab(self.tab1,'General')
+        self.tabWidget.addTab(self.tab2,'Chemicals')
+        self.tabWidget.addTab(self.tab3,'PTM')
+
+        self.buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.YesRole | QtWidgets.QDialogButtonBox.Close)
+
+        #buttonBox.accepted.connect(self.accept)
+        #buttonBox.rejected.connect(self.reject)
+
+        self.mainLayout = QtWidgets.QVBoxLayout()
+        self.mainLayout.addWidget(self.tabWidget)
+        self.mainLayout.addWidget(self.buttonBox)
+        self.setLayout(self.mainLayout)
+        self.resize(300,250)
+        self.setWindowTitle("Nodes data")
 
 def compute_number_of_decimal(float):
     abs_start = abs(float)
