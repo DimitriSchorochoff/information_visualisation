@@ -444,9 +444,36 @@ class Ui_MainWindow(object):
         for c in column_cat:
             attr_lst.append(build_graph.Attribute_categorical("Node: {}".format(c), True,
                                                               build_graph.attr_data_node_2_cat_factory(self.df_node,
-                                                                                                       "#BIOGRID ID",
-                                                                                                       c)))
-            
+                                                                                                       "#BIOGRID ID", c)))
+        column_num = ["INTERACTION COUNT", "PTM COUNT", "CHEMICAL INTERACTION COUNT"]
+        for c in column_num:
+            attr_lst.append(build_graph.Attribute_numerical("Node: {}".format(c), True,
+                                                            build_graph.attr_data_node_2_num_factory(self.df_node,
+                                                                                                     "#BIOGRID ID", c), 0))
+
+        #Edge db
+        """
+        column_cat = ["Experimental System", "Experimental System Type", "Author", "Throughput", "Modification", "Ontology Term Names", "Ontology Term Categories", "Ontology Term Qualifier Names", "Ontology Term Types"]
+        for c in column_cat:
+            attr_lst.append(build_graph.Attribute_categorical("Edge: {}".format(c), True,
+                                                            build_graph.attr_data_node_2_cat_factory(self.df_chemicals,
+                                                                                                     "BioGRID Gene ID", c)))
+        """
+
+        #Chem db
+        column_cat = ["Systematic Name", "Official Symbol", "Action", "Interaction Type", "Author", "Chemical Name", "Chemical Brands", "Chemical Source", "Molecular Formula", "Chemical Type", "ATC Codes", "Curated By", "Method", "Related Systematic Name", "Related Official Symbol"]
+        for c in column_cat:
+            attr_lst.append(build_graph.Attribute_categorical("Chem: {}".format(c), True,
+                                                            build_graph.attr_data_node_2_cat_factory(self.df_chemicals,
+                                                                                                     "BioGRID Gene ID", c)))
+
+        #PTM db
+        column_cat = ["Systematic Name", "Official Symbol", "Post Translational Modification", "Residue", "Author", "Has Relationships", "Source Database"]
+        for c in column_cat:
+            attr_lst.append(build_graph.Attribute_categorical("PTM: {}".format(c), True,
+                                                            build_graph.attr_data_node_2_cat_factory(self.df_ptm,
+                                                                                                     "BioGRID ID", c)))
+
         return attr_lst
 
 
@@ -501,7 +528,7 @@ class Ui_MainWindow(object):
     def delete_unfiltered(self):
         for a in self.list_attribute:
             a.filter_graph(self.graph_current)
-            a.is_init = False
+            a.reset_attr()
 
         self.update_selection_list()
 
@@ -510,7 +537,7 @@ class Ui_MainWindow(object):
         self.init_selection_lists()
 
         for a in self.list_attribute:
-            a.is_init = False
+            a.reset_attr()
 
         self.update_selection_list()
 
@@ -794,8 +821,8 @@ class Ui_MainWindow(object):
         return attr_num_apply_color
 
     def attr_selection_list_on_item_click(self, item):
+        #BALISE
         self.reset_attrib_layout()
-
         # Disconnect if possible
         try:
             self.attr_filter_range_slider.disconnect()
@@ -812,17 +839,6 @@ class Ui_MainWindow(object):
 
         attribute.init_attr(self.graph_current)
 
-        """
-        if item.text() == "Degree":
-            if not attribute.is_init: attribute.values = dict(self.graph_current.degree())
-            self.attr_filter_range_slider.setDecimals(0)
-        if item.text() == "Clustering coefficient":
-            if not attribute.is_init: attribute.values = build_graph.clustering_coefficient(self.graph_current)
-            self.attr_filter_range_slider.setDecimals(3)
-        elif item.text() == "Communities":
-            if not attribute.is_init: build_graph.find_communities(self.graph_current, attribute)
-        """
-
         if attribute.type == 0:
             if (attribute.absolute_max_value - attribute.absolute_min_value) <= 0 or (
                     attribute.current_max_value - attribute.current_min_value) <= 0:
@@ -831,17 +847,19 @@ class Ui_MainWindow(object):
                 self.set_attrib_layout_numerical(attribute)
                 self.attr_filter_range_slider.setDecimals(attribute.n_decimals)
                 self.attr_filter_range_slider.setVisible(True)
-                self.attr_filter_range_slider.setMinimum(attribute.absolute_min_value)
-                self.attr_filter_range_slider.setMaximum(attribute.absolute_max_value)
+
+                self.attr_filter_range_slider.setMinimum(sys.float_info.min)
+                self.attr_filter_range_slider.setMaximum(sys.float_info.max)
+                self.attr_filter_range_slider.setMinimum(float(attribute.absolute_min_value))
+                self.attr_filter_range_slider.setMaximum(float(attribute.absolute_max_value))
+
                 self.attr_filter_range_slider.setValue((attribute.current_min_value, attribute.current_max_value))
                 self.attr_filter_range_slider.valueChanged.connect(
                     Ui_MainWindow.attr_numerical_on_slider_click_factory(attribute))
-
                 self.attr_scale_with_size_checkbox.setChecked(attribute.scale_with_size)
                 self.attr_scale_with_size_checkbox.clicked.connect(
                     Ui_MainWindow.attr_numerical_scale_click_factory(attribute))
                 self.attr_apply_color_button.clicked.connect(Ui_MainWindow.attr_num_apply_color_factory(attribute, self.graph_current))
-
         elif attribute.type == 1:
             self.set_attrib_layout_categorical(attribute)
             self.attr_apply_color_button.clicked.connect(
@@ -885,7 +903,6 @@ class Ui_MainWindow(object):
             self.attr_num_color_hlayout.addWidget(color_button)
 
     def set_attrib_layout_categorical(self, attrib):
-        print(len(attrib.categories))
         self.attr_scroll_area.setVisible(True)
 
         for i in range(len(attrib.categories)):

@@ -68,6 +68,9 @@ class Attribute:
             self.init_fun(graph, self)
             self.is_init = True
 
+    def reset_attr(self):
+        self.is_init = False
+
     def filter_graph(self, graph):
         pass
 
@@ -146,6 +149,17 @@ class Attribute_numerical(Attribute):
         if not save_init:
             self.update_min_max()
 
+    def reset_attr(self):
+        super().reset_attr()
+        self.values = {}
+
+        self.absolute_min_value = 0
+        self.absolute_max_value = 1
+        self.current_min_value = 0
+        self.current_max_value = 1
+        self._filtered_max_value = 0
+        self._filtered_min_value = 1
+
     def filter_graph(self, graph):
         if self.absolute_min_value == self.current_min_value and self.absolute_max_value == self.current_max_value:
             return
@@ -202,6 +216,20 @@ class Attribute_categorical(Attribute):
         self.categories_to_keep = []
         self.categories = []  # List of list of node/edge id
 
+    def init_attr(self, graph):
+        save_init = self.is_init
+        super().init_attr(graph)
+
+        if not save_init:
+            for i in range(len(self.categories_name)):
+                self.categories_name[i] = self.categories_name[i] + " (size: {})".format(len(self.categories[i]))
+
+    def reset_attr(self):
+        super().reset_attr()
+        self.categories_name = []
+        self.categories_color = []
+        self.categories_to_keep = []
+        self.categories = []  # List of list of node/edge id
     """
         def smooth_name_len(self):
         len_max = 0

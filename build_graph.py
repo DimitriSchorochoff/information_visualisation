@@ -184,11 +184,22 @@ def attr_find_communities(graph, attrib_cat, partition=None, resolution=2.0, ran
 
     attrib_cat.categories.sort(reverse=True, key=len)
 
-    attrib_cat.categories_name = ["Community {} (size: {})".format(i + 1, len(attrib_cat.categories[i])) for i in
-                                  range(n_commu)]
+    attrib_cat.categories_name = ["Community {}".format(i + 1) for i in range(n_commu)]
     rgb = sns.color_palette(None, len(set(communities.values())))
     attrib_cat.categories_color = [matplotlib.colors.to_hex(col) for col in rgb]
     attrib_cat.categories_to_keep = [True for i in range(n_commu)]
+
+def attr_data_node_2_num_factory(df, node_column, val_column):
+    def attr_data_node_2_num(graph, attr):
+        for n in graph.nodes:
+            val = df.loc[(df[node_column] == n)][val_column].values
+            if len(val) == 0:
+                val = -1
+            else:
+                val = val[0]
+            attr.values[n] = val
+
+    return attr_data_node_2_num
 
 def attr_data_node_2_cat_factory(df, node_column, val_column):
     def attr_data_node_2_cat(graph, attr):
@@ -201,7 +212,7 @@ def attr_data_node_2_cat_factory(df, node_column, val_column):
             if len(cat) == 0:
                 cat = "None"
             else:
-                cat = cat[0]
+                cat = str(cat[0])
                 if cat == "-": cat = "None"
                 if not cat in cat_name:
                     cat_name[cat] = name_counter
@@ -209,6 +220,8 @@ def attr_data_node_2_cat_factory(df, node_column, val_column):
                     name_counter += 1
 
             attr.categories[cat_name[cat]].append(n)
+
+        attr.categories.sort(reverse=True, key=len)
 
         n_cat = len(cat_name)
         attr.categories_name = [0 for i in range(n_cat)]
