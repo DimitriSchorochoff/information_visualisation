@@ -156,6 +156,71 @@ def get_edge_width(graph, node1, node2):
     return graph[node1][node2]['width']
 
 
+def attr_degree_init_fun(g, a):
+    a.values = dict(g.degree())
+
+def attr_clustering_init_fun(g, a):
+    a.values = nx.algorithms.clustering(g)
+
+def attr_find_communities(graph, attrib_cat, partition=None, resolution=2.0, randomize=None, random_state=42):
+    # assert isinstance(attrib_cat, Attribute_categorical)
+    communities = community_louvain.best_partition(graph, partition=partition, resolution=resolution,
+                                                   randomize=randomize, random_state=random_state)
+    assert isinstance(communities, dict)
+
+    n_commu = len(set(communities.values()))
+
+    cat = [[] for i in range(n_commu)]
+    for node, commu in communities.items():
+        cat[commu].append(node)
+
+    # Filter community of size 1
+    n_commu = 0
+    attrib_cat.categories = []
+    for commu in cat:
+        if len(commu) > 1:
+            n_commu += 1
+            attrib_cat.categories.append(commu)
+
+    attrib_cat.categories.sort(reverse=True, key=len)
+
+    attrib_cat.categories_name = ["Community {} (size: {})".format(i + 1, len(attrib_cat.categories[i])) for i in
+                                  range(n_commu)]
+    rgb = sns.color_palette(None, len(set(communities.values())))
+    attrib_cat.categories_color = [matplotlib.colors.to_hex(col) for col in rgb]
+    attrib_cat.categories_to_keep = [True for i in range(n_commu)]
+
+def attr_data_node_2_cat_factory(df, node_column, val_column):
+    def attr_data_node_2_cat(graph, attr):
+        cat_name = {"None": 0}
+        name_counter = 1
+
+        attr.categories = [[]]
+        for n in graph.nodes:
+            cat = df.loc[(df[node_column] == n)][val_column].values
+            if len(cat) == 0:
+                cat = "None"
+            else:
+                cat = cat[0]
+                if cat == "-": cat = "None"
+                if not cat in cat_name:
+                    cat_name[cat] = name_counter
+                    attr.categories.append([])
+                    name_counter += 1
+
+            attr.categories[cat_name[cat]].append(n)
+
+        n_cat = len(cat_name)
+        attr.categories_name = [0 for i in range(n_cat)]
+        for k, v in cat_name.items():
+            attr.categories_name[v] = k
+
+        attr.categories_to_keep = [True for i in range(n_cat)]
+        rgb = sns.color_palette(None, n_cat)
+        attr.categories_color = [matplotlib.colors.to_hex(col) for col in rgb]
+
+    return attr_data_node_2_cat
+
 def shortest_path(source, target, graph, method='dijkstra'):
     path = nx.algorithms.shortest_path(graph, source=source, target=target, method=method)
     idx = 0
@@ -185,35 +250,6 @@ def degree_of_node(graph, nodes=None, avg=False):
         return np.mean([i[1] for i in graph.degree()])
     # nodes can be an int or a list of int
     return graph.degree(nodes)
-
-
-def find_communities(graph, attrib_cat, partition=None, resolution=2.0, randomize=None, random_state=42):
-    # assert isinstance(attrib_cat, Attribute_categorical)
-    communities = community_louvain.best_partition(graph, partition=partition, resolution=resolution,
-                                                   randomize=randomize, random_state=random_state)
-    assert isinstance(communities, dict)
-
-    n_commu = len(set(communities.values()))
-
-    cat = [[] for i in range(n_commu)]
-    for node, commu in communities.items():
-        cat[commu].append(node)
-
-    # Filter community of size 1
-    n_commu = 0
-    attrib_cat.categories = []
-    for commu in cat:
-        if len(commu) > 1:
-            n_commu += 1
-            attrib_cat.categories.append(commu)
-
-    attrib_cat.categories.sort(reverse=True, key=len)
-
-    attrib_cat.categories_name = ["Community {} (size: {})".format(i + 1, len(attrib_cat.categories[i])) for i in
-                                  range(n_commu)]
-    rgb = sns.color_palette(None, len(set(communities.values())))
-    attrib_cat.categories_color = [matplotlib.colors.to_hex(col) for col in rgb]
-    attrib_cat.categories_to_keep = [True for i in range(n_commu)]
 
 
 def betweenness_centrality(graph, k=None, normalized=False, endpoints=False, seed=None):
@@ -247,11 +283,6 @@ def data_node_2_attr_cat(graph, df, attr, node_column, val_column):
     attr.categories_to_keep = [True for i in range(n_cat)]
     rgb = sns.color_palette(None, n_cat)
     attr.categories_color = [matplotlib.colors.to_hex(col) for col in rgb]
-
-
-    print(attr.categories_name)
-    print(attr.categories_color)
-    print(attr.categories)
     return
 
 

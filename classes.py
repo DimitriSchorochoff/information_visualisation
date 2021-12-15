@@ -55,12 +55,18 @@ class Edge:
 
 
 class Attribute:
-    def __init__(self, name, type, related_to_node):
+    def __init__(self, name, type, related_to_node, init_fun):
         self.name = name
         self.type = type  # Numerical = 0, Categorical = 1, Algorithm = 2
         self.related_to_node = related_to_node
 
         self.is_init = False
+        self.init_fun = init_fun # Graph, Attr -> init all argument properly
+
+    def init_attr(self, graph):
+        if not self.is_init:
+            self.init_fun(graph, self)
+            self.is_init = True
 
     def filter_graph(self, graph):
         pass
@@ -70,8 +76,8 @@ class Attribute:
 
 
 class Attribute_numerical(Attribute):
-    def __init__(self, name, related_to_node, min_value=0, max_value=1):
-        super().__init__(name, 0, related_to_node)
+    def __init__(self, name, related_to_node, init_fun, n_decimals=0, min_value=0, max_value=1):
+        super().__init__(name, 0, related_to_node, init_fun)
         self.absolute_min_value = min_value
         self.absolute_max_value = max_value
         self.current_min_value = min_value
@@ -79,8 +85,10 @@ class Attribute_numerical(Attribute):
         self._filtered_max_value = max_value
         self._filtered_min_value = min_value
 
+        self.n_decimals = n_decimals
+
         self.colors = ["#6E85B2", "#5C527F", "#3E2C41", "#261C2C"]  # from https://colorhunt.co/palettes/blue
-        self.values = {}
+        self.values = {} #Node -> value
         self.scale_with_size = False
 
     def update_min_max(self):
@@ -131,6 +139,13 @@ class Attribute_numerical(Attribute):
                     if self.values[t[0]][t[1]] < self._filtered_min_value:
                         self._filtered_min_value = self.values[v][t[1]]
 
+    def init_attr(self, graph):
+        save_init = self.is_init
+        super().init_attr(graph)
+
+        if not save_init:
+            self.update_min_max()
+
     def filter_graph(self, graph):
         if self.absolute_min_value == self.current_min_value and self.absolute_max_value == self.current_max_value:
             return
@@ -180,8 +195,8 @@ class Attribute_numerical(Attribute):
 
 
 class Attribute_categorical(Attribute):
-    def __init__(self, name, related_to_node):
-        super().__init__(name, 1, related_to_node)
+    def __init__(self, name, related_to_node, init_fun):
+        super().__init__(name, 1, related_to_node, init_fun)
         self.categories_name = []
         self.categories_color = []
         self.categories_to_keep = []

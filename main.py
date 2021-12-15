@@ -31,27 +31,32 @@ FILE_PTM_PATH = None
 DEBUG = True
 
 if DEBUG:
-    FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-    FILE_CHEMICALS_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
-    FILE_PTM_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
-    #FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    #FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-    #FILE_CHEMICALS_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
-    #FILE_PTM_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
+    #FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    #FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    #FILE_CHEMICALS_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
+    #FILE_PTM_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
+    FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    FILE_CHEMICALS_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
+    FILE_PTM_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
 
 
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
+        #Init graph + df
+        self.graph_current, self.df_node, self.df_edge = build_graph.load_graph_from_csv(FILE_NODES_PATH,
+                                                                                         FILE_EDGES_PATH)
+        self.graph_original = copy.deepcopy(self.graph_current)
+        self.df_chemicals = pd.read_csv(FILE_CHEMICALS_PATH, sep='\t')
+        self.df_ptm = pd.read_csv(FILE_PTM_PATH, sep='\t')
+
+
         self.list_layout = [build_graph.LAYOUT_DEFAULT, build_graph.LAYOUT_BARNES, build_graph.LAYOUT_FORCEATLAS,
                             build_graph.LAYOUT_REPULSION]
 
-        self.list_attribute = [build_graph.Attribute_numerical("Degree", True),
-                               build_graph.Attribute_numerical("Clustering coefficient", True),
-                               build_graph.Attribute_categorical("Communities", True)]
-        self.df_chemicals = pd.read_csv(FILE_CHEMICALS_PATH, sep='\t')
-        self.df_ptm = pd.read_csv(FILE_PTM_PATH, sep='\t')
+        self.list_attribute = self.init_list_attr()
+
 
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
@@ -67,9 +72,6 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.splitter)
 
         self.webEngineView = QtWebEngineWidgets.QWebEngineView(self.centralwidget)
-        self.graph_current, self.df_node, self.df_edge = build_graph.load_graph_from_csv(FILE_NODES_PATH,
-                                                                                         FILE_EDGES_PATH)
-        self.graph_original = copy.deepcopy(self.graph_current)
 
         self.splitter.addWidget(self.webEngineView)
 
@@ -195,7 +197,7 @@ class Ui_MainWindow(object):
 
         self.attr_scroll_area = QtWidgets.QScrollArea()
         self.attr_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.attr_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.attr_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.attr_scroll_area.setWidgetResizable(True)
         self.attr_scroll_area.setWidget(self.attr_cat_widgets)
         self.attr_scroll_area.setVisible(False)
@@ -429,6 +431,26 @@ class Ui_MainWindow(object):
         # Compute then display graph
         # self.runComputeAndDisplayGraph()
         #print(build_graph.data_node_2_attr_cat(self.graph_current, self.df_node, build_graph.Attribute_categorical("CATEGORY VALUES", True), "#BIOGRID ID", "CATEGORY VALUES"))
+
+
+    def init_list_attr(self):
+        attr_lst = []
+        attr_lst.append(build_graph.Attribute_numerical("Degree", True, build_graph.attr_degree_init_fun, 0))
+        attr_lst.append(build_graph.Attribute_numerical("Clustering coefficient", True, build_graph.attr_clustering_init_fun, 0))
+        attr_lst.append(build_graph.Attribute_categorical("Communities", True, build_graph.attr_find_communities))
+
+        #Node db
+        column_cat = ["CATEGORY VALUES", "OFFICIAL SYMBOL", "SUBCATEGORY VALUES"]
+        for c in column_cat:
+            attr_lst.append(build_graph.Attribute_categorical("Node: {}".format(c), True,
+                                                              build_graph.attr_data_node_2_cat_factory(self.df_node,
+                                                                                                       "#BIOGRID ID",
+                                                                                                       c)))
+            
+        return attr_lst
+
+
+
 
     def init_selection_lists(self):
         self.layout_selection_list_init()
@@ -788,6 +810,9 @@ class Ui_MainWindow(object):
             if attribute.name == item.text():
                 break
 
+        attribute.init_attr(self.graph_current)
+
+        """
         if item.text() == "Degree":
             if not attribute.is_init: attribute.values = dict(self.graph_current.degree())
             self.attr_filter_range_slider.setDecimals(0)
@@ -796,14 +821,15 @@ class Ui_MainWindow(object):
             self.attr_filter_range_slider.setDecimals(3)
         elif item.text() == "Communities":
             if not attribute.is_init: build_graph.find_communities(self.graph_current, attribute)
+        """
 
         if attribute.type == 0:
-            if not attribute.is_init: attribute.update_min_max()
             if (attribute.absolute_max_value - attribute.absolute_min_value) <= 0 or (
                     attribute.current_max_value - attribute.current_min_value) <= 0:
                 self.attr_filter_range_slider.setVisible(False)
             else:
                 self.set_attrib_layout_numerical(attribute)
+                self.attr_filter_range_slider.setDecimals(attribute.n_decimals)
                 self.attr_filter_range_slider.setVisible(True)
                 self.attr_filter_range_slider.setMinimum(attribute.absolute_min_value)
                 self.attr_filter_range_slider.setMaximum(attribute.absolute_max_value)
@@ -859,6 +885,7 @@ class Ui_MainWindow(object):
             self.attr_num_color_hlayout.addWidget(color_button)
 
     def set_attrib_layout_categorical(self, attrib):
+        print(len(attrib.categories))
         self.attr_scroll_area.setVisible(True)
 
         for i in range(len(attrib.categories)):
