@@ -190,16 +190,25 @@ def find_communities(graph, partition=None, resolution=1.0, randomize=None, rand
         graph.nodes[node]['color'] = palette[communities[node]]
  """
 
-def find_communities(graph, attrib_cat, partition=None, resolution=1.0, randomize=None, random_state=42):
+def find_communities(graph, attrib_cat, partition=None, resolution=2.0, randomize=None, random_state=42):
     #assert isinstance(attrib_cat, Attribute_categorical)
     communities = community_louvain.best_partition(graph, partition=partition, resolution=resolution, randomize=randomize, random_state=random_state)
     assert isinstance(communities, dict)
 
     n_commu = len(set(communities.values()))
 
-    attrib_cat.categories = [[] for i in range(n_commu)]
+    cat = [[] for i in range(n_commu)]
     for node, commu in communities.items():
-        attrib_cat.categories[commu].append(node)
+        cat[commu].append(node)
+
+    #Filter community of size 1
+    n_commu = 0
+    attrib_cat.categories = []
+    for commu in cat:
+        if len(commu) > 1:
+            n_commu+=1
+            attrib_cat.categories.append(commu)
+
     attrib_cat.categories.sort(reverse=True, key=len)
 
     attrib_cat.categories_name = ["Community {} (size: {})".format(i+1, len(attrib_cat.categories[i])) for i in range(n_commu)]

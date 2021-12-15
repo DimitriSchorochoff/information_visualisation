@@ -55,10 +55,12 @@ class Edge:
 
 
 class Attribute:
-    def __init__(self, name, type):
+    def __init__(self, name, type, related_to_node):
         self.name = name
-        self.is_init = False
         self.type = type  # Numerical = 0, Categorical = 1, Algorithm = 2
+        self.related_to_node = related_to_node
+
+        self.is_init = False
 
     def filter_graph(self, graph):
         pass
@@ -69,16 +71,16 @@ class Attribute:
 
 class Attribute_numerical(Attribute):
     def __init__(self, name, min_value, max_value, related_to_node):
-        super().__init__(name, 0)
+        super().__init__(name, 0, related_to_node)
         self.absolute_min_value = min_value
         self.absolute_max_value = max_value
         self.current_min_value = min_value
         self.current_max_value = max_value
         self._filtered_max_value = max_value
         self._filtered_min_value = min_value
-        self.related_to_node = related_to_node
 
-        self.values = []
+        self.colors = ["#6E85B2", "#5C527F", "#3E2C41", "#261C2C"]  # from https://colorhunt.co/palettes/blue
+        self.values = {}
         self.scale_with_size = False
 
     def update_min_max(self):
@@ -100,6 +102,35 @@ class Attribute_numerical(Attribute):
     def normalize_value(self, value):
         return (value - self._filtered_min_value) / self._filtered_max_value
 
+    def get_color_index(self, value):
+        n_color = len(self.colors)
+        portion = (self._filtered_max_value - self._filtered_min_value) / n_color
+        for i in range(n_color - 1):
+            if self._filtered_min_value + i * portion <= value <= self._filtered_min_value + (i + 1) * portion:
+                return i
+        return n_color - 1
+
+    def set_filtered_min_max(self):
+        # Compute new min and max value after the filter to have proper normalization
+        self._filtered_min_value = self.absolute_max_value
+        self._filtered_max_value = self.absolute_min_value
+
+        if self.related_to_node:
+            for n, value in self.values:
+                if self.current_min_value < value < self.current_max_value:
+                    if value > self._filtered_max_value:
+                        self._filtered_max_value = value
+                    if value < self._filtered_min_value:
+                        self._filtered_min_value = value
+
+        else:
+            for t, v in self.values.keys():
+                if self.current_min_value < self.values[t[0]][t[1]] < self.current_max_value:
+                    if self.values[t[0]][t[1]] > self._filtered_max_value:
+                        self._filtered_max_value = self.values[t[0]][t[1]]
+                    if self.values[t[0]][t[1]] < self._filtered_min_value:
+                        self._filtered_min_value = self.values[v][t[1]]
+
     def filter_graph(self, graph):
         if self.absolute_min_value == self.current_min_value and self.absolute_max_value == self.current_max_value:
             return
@@ -111,7 +142,7 @@ class Attribute_numerical(Attribute):
         if self.related_to_node:
             nodes_to_remove = []
             for n in graph.nodes:
-                if ( self.values[n] < self.current_min_value ) or ( self.current_max_value < self.values[n] ):
+                if (self.values[n] < self.current_min_value) or (self.current_max_value < self.values[n]):
                     nodes_to_remove.append(n)
                 else:
                     if self.values[n] > self._filtered_max_value:
@@ -124,7 +155,7 @@ class Attribute_numerical(Attribute):
         else:
             edges_to_remove = []
             for a, b in graph.edges:
-                if ( self.values[a][b] < self.current_min_value ) or ( self.current_max_value < self.values[a][b] ):
+                if (self.values[a][b] < self.current_min_value) or (self.current_max_value < self.values[a][b]):
                     edges_to_remove.append((a, b))
                 else:
                     if self.values[a][b] > self._filtered_max_value:
@@ -140,23 +171,21 @@ class Attribute_numerical(Attribute):
         if self.related_to_node:
             for n in graph.nodes:
                 node_scaler = self.normalize_value(self.values[n])
-                graph.nodes[n]["size"] = graph.nodes[n]["size"] * node_scaler
+                graph.nodes[n]["size"] = max(1., graph.nodes[n]["size"] * node_scaler * 10)
 
         else:
-            for a,b in graph.edges:
+            for a, b in graph.edges:
                 node_scaler = self.normalize_value(self.values[a][b])
-                graph.edges[a][b]["size"] = graph.edges[a][b]["size"] * node_scaler
-
+                graph.edges[a][b]["size"] = max(1., graph.edges[a][b]["size"] * node_scaler * 10)
 
 
 class Attribute_categorical(Attribute):
     def __init__(self, name, related_to_node):
-        super().__init__(name, 1)
+        super().__init__(name, 1, related_to_node)
         self.categories_name = []
         self.categories_color = []
         self.categories_to_keep = []
-        self.categories = [] #List of list of node/edge id
-        self.related_to_node = related_to_node
+        self.categories = []  # List of list of node/edge id
 
     """
         def smooth_name_len(self):
@@ -181,7 +210,6 @@ class Attribute_categorical(Attribute):
                     graph.remove_nodes_from(self.categories[i])
                 else:
                     graph.remove_edges_from(self.categories[i])
-
 
 
 class Attribute_algorithm(Attribute):
