@@ -31,32 +31,30 @@ FILE_PTM_PATH = None
 DEBUG = True
 
 if DEBUG:
-    #FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    #FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-    #FILE_CHEMICALS_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
-    #FILE_PTM_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
-    FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-    FILE_CHEMICALS_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
-    FILE_PTM_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
+    FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    FILE_CHEMICALS_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
+    FILE_PTM_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
+    #FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    #FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    #FILE_CHEMICALS_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
+    #FILE_PTM_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
 
 
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
-        #Init graph + df
+        # Init graph + df
         self.graph_current, self.df_node, self.df_edge = build_graph.load_graph_from_csv(FILE_NODES_PATH,
                                                                                          FILE_EDGES_PATH)
         self.graph_original = copy.deepcopy(self.graph_current)
         self.df_chemicals = pd.read_csv(FILE_CHEMICALS_PATH, sep='\t')
         self.df_ptm = pd.read_csv(FILE_PTM_PATH, sep='\t')
 
-
         self.list_layout = [build_graph.LAYOUT_DEFAULT, build_graph.LAYOUT_BARNES, build_graph.LAYOUT_FORCEATLAS,
                             build_graph.LAYOUT_REPULSION]
 
         self.list_attribute = self.init_list_attr()
-
 
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
@@ -293,7 +291,7 @@ class Ui_MainWindow(object):
         spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem2)
 
-        self.horizontalLayout_radio = QtWidgets.QHBoxLayout()
+        """self.horizontalLayout_radio = QtWidgets.QHBoxLayout()
         self.horizontalLayout_radio.setObjectName("horizontalLayout_radio")
         self.node_radio1 = QRadioButton('General information')
         self.node_radio2 = QRadioButton('Chemicals information')
@@ -301,10 +299,10 @@ class Ui_MainWindow(object):
         self.horizontalLayout_radio.addWidget(self.node_radio1)
         self.horizontalLayout_radio.addWidget(self.node_radio2)
         self.horizontalLayout_radio.addWidget(self.node_radio3)
-        self.node_radio1.setChecked(True)
+        self.node_radio1.setChecked(True)"""
 
         self.verticalLayout_3.addLayout(self.horizontalLayout_4)
-        self.verticalLayout_3.addLayout(self.horizontalLayout_radio)
+        #self.verticalLayout_3.addLayout(self.horizontalLayout_radio)
 
         spacerItem3 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_3.addItem(spacerItem3)
@@ -430,27 +428,24 @@ class Ui_MainWindow(object):
         self.init_selection_lists()
         # Compute then display graph
         # self.runComputeAndDisplayGraph()
-        #print(build_graph.data_node_2_attr_cat(self.graph_current, self.df_node, build_graph.Attribute_categorical("CATEGORY VALUES", True), "#BIOGRID ID", "CATEGORY VALUES"))
-
+        # print(build_graph.data_node_2_attr_cat(self.graph_current, self.df_node, build_graph.Attribute_categorical("CATEGORY VALUES", True), "#BIOGRID ID", "CATEGORY VALUES"))
 
     def init_list_attr(self):
         attr_lst = []
         attr_lst.append(build_graph.Attribute_numerical("Degree", True, build_graph.attr_degree_init_fun, 0))
-        attr_lst.append(build_graph.Attribute_numerical("Clustering coefficient", True, build_graph.attr_clustering_init_fun, 0))
+        attr_lst.append(
+            build_graph.Attribute_numerical("Clustering coefficient", True, build_graph.attr_clustering_init_fun, 0))
         attr_lst.append(build_graph.Attribute_categorical("Communities", True, build_graph.attr_find_communities))
 
-        #Node db
+        # Node db
         column_cat = ["CATEGORY VALUES", "OFFICIAL SYMBOL", "SUBCATEGORY VALUES"]
         for c in column_cat:
             attr_lst.append(build_graph.Attribute_categorical("Node: {}".format(c), True,
                                                               build_graph.attr_data_node_2_cat_factory(self.df_node,
                                                                                                        "#BIOGRID ID",
                                                                                                        c)))
-            
+
         return attr_lst
-
-
-
 
     def init_selection_lists(self):
         self.layout_selection_list_init()
@@ -765,7 +760,6 @@ class Ui_MainWindow(object):
 
         return attr_cat_apply_color
 
-
     @staticmethod
     def attrib_num_color_on_click_factory(attrib_num, i, qbutton):
         def attrib_num_color_on_click():
@@ -786,7 +780,7 @@ class Ui_MainWindow(object):
                         color = attr.colors[attr.get_color_index(attr.values[n])]
                         build_graph.change_node_color(graph, n, color)
             else:
-                for a,b in graph.edges:
+                for a, b in graph.edges:
                     if attr.current_min_value <= attr.values[a][b] <= attr.current_max_value:
                         color = attr.colors[attr.get_color_index(attr.values[a][b])]
                         build_graph.change_edge_color(graph, a, b, color)
@@ -804,7 +798,7 @@ class Ui_MainWindow(object):
         except TypeError:
             pass
 
-        #Find attribute
+        # Find attribute
         attribute = None
         for attribute in self.list_attribute:
             if attribute.name == item.text():
@@ -840,7 +834,8 @@ class Ui_MainWindow(object):
                 self.attr_scale_with_size_checkbox.setChecked(attribute.scale_with_size)
                 self.attr_scale_with_size_checkbox.clicked.connect(
                     Ui_MainWindow.attr_numerical_scale_click_factory(attribute))
-                self.attr_apply_color_button.clicked.connect(Ui_MainWindow.attr_num_apply_color_factory(attribute, self.graph_current))
+                self.attr_apply_color_button.clicked.connect(
+                    Ui_MainWindow.attr_num_apply_color_factory(attribute, self.graph_current))
 
         elif attribute.type == 1:
             self.set_attrib_layout_categorical(attribute)
@@ -1055,10 +1050,12 @@ class Ui_MainWindow(object):
             msg.setWindowTitle("Node data")
             msg.addButton(QtWidgets.QMessageBox.Close)
             msg.setText("APPLY TO ALL NODES")
+            msg.exec_()
         else:
             self.data1 = self.df_node.loc[self.df_node['#BIOGRID ID'] == int(item.text())]
             self.data2 = self.df_chemicals.loc[self.df_chemicals['BioGRID Gene ID'] == int(item.text())]
             self.data3 = self.df_ptm.loc[self.df_ptm['BioGRID ID'] == int(item.text())]
+            self.data4 = "test"
             tab_dialog = TabDialog(self)
             tab_dialog.exec_()
         """else:
@@ -1186,6 +1183,7 @@ class Ui_MainWindow(object):
             item = selection_list.item(i)
             item.setHidden(filtering_str != item.text()[:len(filtering_str)])
 
+
 class TabDialog(QtWidgets.QDialog):
     def __init__(self, parent, origin=None):
         super(TabDialog, self).__init__(origin)
@@ -1213,9 +1211,14 @@ class TabDialog(QtWidgets.QDialog):
         else:
             self.label3.setText(build_graph.display_data(self.parent.data3))
 
-        self.tabWidget.addTab(self.tab1,'General')
-        self.tabWidget.addTab(self.tab2,'Chemicals')
-        self.tabWidget.addTab(self.tab3,'PTM')
+        self.tab4 = QtWidgets.QWidget()
+        self.label4 = QtWidgets.QLabel(self.tab4)
+        self.label4.setText(self.parent.data4)
+
+        self.tabWidget.addTab(self.tab1, 'General')
+        self.tabWidget.addTab(self.tab2, 'Chemicals')
+        self.tabWidget.addTab(self.tab3, 'PTM')
+        self.tabWidget.addTab(self.tab4, 'Attributes')
 
         self.pushButton = QtWidgets.QPushButton('Delete node', self)
         self.pushButton.clicked.connect(self.on_click)
@@ -1224,7 +1227,7 @@ class TabDialog(QtWidgets.QDialog):
         self.mainLayout.addWidget(self.tabWidget)
         self.mainLayout.addWidget(self.pushButton)
         self.setLayout(self.mainLayout)
-        self.resize(500,400)
+        self.resize(500, 400)
         self.setWindowTitle("Nodes data")
 
     @pyqtSlot()
@@ -1232,6 +1235,7 @@ class TabDialog(QtWidgets.QDialog):
         build_graph.remove_Node(self.parent.graph_current, int(self.parent.item.text()))
         self.parent.node_selection_list_update()
         self.close()
+
 
 def compute_number_of_decimal(float):
     abs_start = abs(float)
