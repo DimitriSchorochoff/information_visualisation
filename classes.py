@@ -70,7 +70,7 @@ class Attribute:
 
 
 class Attribute_numerical(Attribute):
-    def __init__(self, name, min_value, max_value, related_to_node):
+    def __init__(self, name, related_to_node, min_value=0, max_value=1):
         super().__init__(name, 0, related_to_node)
         self.absolute_min_value = min_value
         self.absolute_max_value = max_value
@@ -85,12 +85,12 @@ class Attribute_numerical(Attribute):
 
     def update_min_max(self):
         # Set initial value
-        for a, b in self.values:
+        for a, b in self.values.items():
             self.absolute_min_value = b
             self.absolute_max_value = b
             break
 
-        for a, b in self.values:
+        for a, b in self.values.items():
             if b < self.absolute_min_value:
                 self.absolute_min_value = b
             elif b > self.absolute_max_value:
@@ -116,7 +116,7 @@ class Attribute_numerical(Attribute):
         self._filtered_max_value = self.absolute_min_value
 
         if self.related_to_node:
-            for n, value in self.values:
+            for n, value in self.values.items():
                 if self.current_min_value < value < self.current_max_value:
                     if value > self._filtered_max_value:
                         self._filtered_max_value = value
@@ -171,12 +171,12 @@ class Attribute_numerical(Attribute):
         if self.related_to_node:
             for n in graph.nodes:
                 node_scaler = self.normalize_value(self.values[n])
-                graph.nodes[n]["size"] = max(1., graph.nodes[n]["size"] * node_scaler * 10)
+                graph.nodes[n]["size"] = max(1., graph.nodes[n]["size"] * node_scaler)
 
         else:
             for a, b in graph.edges:
                 node_scaler = self.normalize_value(self.values[a][b])
-                graph.edges[a][b]["size"] = max(1., graph.edges[a][b]["size"] * node_scaler * 10)
+                graph.edges[a][b]["size"] = max(1., graph.edges[a][b]["size"] * node_scaler)
 
 
 class Attribute_categorical(Attribute):

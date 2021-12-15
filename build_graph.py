@@ -92,6 +92,7 @@ def change_node_color(graph, node, color):
     assert isinstance(graph, nx.Graph)
     graph.nodes[node]['color'] = color
 
+
 def change_all_node_color(graph_save, color):
     assert isinstance(graph_save, nx.Graph)
 
@@ -103,11 +104,13 @@ def change_node_size(graph, node, size):
     assert isinstance(graph, nx.Graph)
     graph.nodes[node]['size'] = size
 
+
 def change_all_node_size(graph_save, size):
     assert isinstance(graph_save, nx.Graph)
 
     for node in graph_save.nodes:
         graph_save.nodes[node]['size'] = size
+
 
 def get_node_color(graph, node):
     assert isinstance(graph, nx.Graph)
@@ -123,6 +126,7 @@ def change_edge_color(graph, node1, node2, color):
     assert isinstance(graph, nx.Graph)
     graph[node1][node2]['color'] = color
 
+
 def change_all_edge_color(graph_save, color):
     assert isinstance(graph_save, nx.Graph)
 
@@ -134,11 +138,13 @@ def change_edge_width(graph, node1, node2, width):
     assert isinstance(graph, nx.Graph)
     graph[node1][node2]['width'] = width
 
+
 def change_all_edge_width(graph_save, width):
     assert isinstance(graph_save, nx.Graph)
 
     for node1, node2 in graph_save.edges:
         graph_save[node1][node2]['width'] = width
+
 
 def get_edge_color(graph, node1, node2):
     assert isinstance(graph, nx.Graph)
@@ -180,19 +186,11 @@ def degree_of_node(graph, nodes=None, avg=False):
     # nodes can be an int or a list of int
     return graph.degree(nodes)
 
-"""
-def find_communities(graph, partition=None, resolution=1.0, randomize=None, random_state=None):
-    communities = community_louvain.best_partition(graph, partition=partition, resolution=resolution, randomize=randomize, random_state=random_state)
-    assert isinstance(communities, dict)
-    rgb = sns.color_palette(None, len(set(communities.values())))
-    palette = [matplotlib.colors.to_hex(col) for col in rgb]
-    for node in communities.keys():
-        graph.nodes[node]['color'] = palette[communities[node]]
- """
 
 def find_communities(graph, attrib_cat, partition=None, resolution=2.0, randomize=None, random_state=42):
-    #assert isinstance(attrib_cat, Attribute_categorical)
-    communities = community_louvain.best_partition(graph, partition=partition, resolution=resolution, randomize=randomize, random_state=random_state)
+    # assert isinstance(attrib_cat, Attribute_categorical)
+    communities = community_louvain.best_partition(graph, partition=partition, resolution=resolution,
+                                                   randomize=randomize, random_state=random_state)
     assert isinstance(communities, dict)
 
     n_commu = len(set(communities.values()))
@@ -201,30 +199,60 @@ def find_communities(graph, attrib_cat, partition=None, resolution=2.0, randomiz
     for node, commu in communities.items():
         cat[commu].append(node)
 
-    #Filter community of size 1
+    # Filter community of size 1
     n_commu = 0
     attrib_cat.categories = []
     for commu in cat:
         if len(commu) > 1:
-            n_commu+=1
+            n_commu += 1
             attrib_cat.categories.append(commu)
 
     attrib_cat.categories.sort(reverse=True, key=len)
 
-    attrib_cat.categories_name = ["Community {} (size: {})".format(i+1, len(attrib_cat.categories[i])) for i in range(n_commu)]
+    attrib_cat.categories_name = ["Community {} (size: {})".format(i + 1, len(attrib_cat.categories[i])) for i in
+                                  range(n_commu)]
     rgb = sns.color_palette(None, len(set(communities.values())))
     attrib_cat.categories_color = [matplotlib.colors.to_hex(col) for col in rgb]
     attrib_cat.categories_to_keep = [True for i in range(n_commu)]
 
 
-def betweenness_centrality(graph, k=None, normalized=True, endpoints=False, seed=None):
+def betweenness_centrality(graph, k=None, normalized=False, endpoints=False, seed=None):
     btw_central = nx.betweenness_centrality(graph, k=k, normalized=normalized, endpoints=endpoints, seed=seed)
-    assert isinstance(btw_central, dict)
-    rgb = sns.color_palette(None, len(set(btw_central.values())))
-    val = list(set(btw_central.values()))
-    palette = [matplotlib.colors.to_hex(col) for col in rgb]
-    for node in btw_central.keys():
-        graph.nodes[node]['color'] = palette[val.index(btw_central[node])]
+    return btw_central
+
+
+def data_node_2_attr_cat(graph, df, attr, node_column, val_column):
+    cat_name = {"None": 0}
+    name_counter = 1
+
+    attr.categories = [[]]
+    for n in graph.nodes:
+        cat = df.loc[(df[node_column] == n)][val_column].values
+        if len(cat) == 0:
+            cat = "None"
+        else:
+            cat = cat[0]
+            if not cat in cat_name:
+                cat_name[cat] = name_counter
+                attr.categories.append([])
+                name_counter += 1
+
+        attr.categories[cat_name[cat]].append(n)
+
+    n_cat = len(cat_name)
+    attr.categories_name = [0 for i in range(n_cat)]
+    for k, v in cat_name.items():
+        attr.categories_name[v] = k
+
+    attr.categories_to_keep = [True for i in range(n_cat)]
+    rgb = sns.color_palette(None, n_cat)
+    attr.categories_color = [matplotlib.colors.to_hex(col) for col in rgb]
+
+
+    print(attr.categories_name)
+    print(attr.categories_color)
+    print(attr.categories)
+    return
 
 
 def display_data(df):
@@ -242,7 +270,12 @@ if __name__ == "__main__":
     df_chemicals = pd.read_csv('Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt', sep='\t')
     df_ptm = pd.read_csv('Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt', sep='\t')
     data1 = df_chemicals.loc[df_chemicals['BioGRID Gene ID'] == 106524]
-    #data2 = df_ptm.loc[df_ptm['BioGRID ID'] == 106524]
+    # data2 = df_ptm.loc[df_ptm['BioGRID ID'] == 106524]
     print(df_ptm['BioGRID ID'])
-    #print(display_data(data1))
-    #print(data2)
+    # print(display_data(data1))
+    # print(data2)
+
+# SYNONYMS TODO
+Node_colum = ["SYSTEMATIC NAME", "OFFICIAL SYMBOL", "INTERACTION COUNT", "PTM COUNT", "CHEMICAL INTERACTION COUNT",
+              "CATEGORY VALUES", "SUBCATEGORY VALUES"]
+Node_columns_is_num = [False, False, True, True, True, False, False]
