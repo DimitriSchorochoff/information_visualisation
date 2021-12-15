@@ -186,9 +186,9 @@ class Ui_MainWindow(QDialog):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.title_label.setText(_translate("MainWindow", "Welcome to GraphX"))
-        self.pushButton_2.setText(_translate("MainWindow", "Select nodes file"))
+        self.pushButton_2.setText(_translate("MainWindow", "Select genes (nodes) file"))
         self.label.setText(_translate("MainWindow", self.DEFAULT_FILE_SELECTED_STRING))
-        self.pushButton_3.setText(_translate("MainWindow", "Select edges file"))
+        self.pushButton_3.setText(_translate("MainWindow", "Select interactions (edges) file"))
         self.label_2.setText(_translate("MainWindow", self.DEFAULT_FILE_SELECTED_STRING))
         self.pushButton_4.setText(_translate("MainWindow", "Select chemicals file"))
         self.label_3.setText(_translate("MainWindow", self.DEFAULT_FILE_SELECTED_STRING))
