@@ -38,13 +38,13 @@ def load_graph_from_csv(filename_nodes, filename_edges):
 
 
 def draw_graph(nx_graph, layout=None):
-    nt_graph = Network('1080px', '1920px')
-    nt_graph.from_nx(nx_graph)  # TODO find a way to avoid computing this line every time
+    #nt_graph = Network('1080px', '1920px')
+    nt_graph = Network(height='100%', width='100%')
+    nt_graph.from_nx(nx_graph)
 
     if layout is None or layout.name == LAYOUT_DEFAULT.name:
         nt_graph.toggle_physics(False)
     elif layout.name == LAYOUT_REPULSION.name:
-        nt_graph.show_buttons(filter_=['physics'])
         nt_graph.repulsion()
     elif layout.name == LAYOUT_FORCEATLAS.name:
         nt_graph.force_atlas_2based()
@@ -189,6 +189,22 @@ def attr_find_communities(graph, attrib_cat, partition=None, resolution=2.0, ran
     attrib_cat.categories_color = [matplotlib.colors.to_hex(col) for col in rgb]
     attrib_cat.categories_to_keep = [True for i in range(n_commu)]
 
+
+def attr_find_min_spanning_tree(graph, attrib_cat):
+    st = nx.algorithms.minimum_spanning_tree(graph)
+
+    attrib_cat.categories = [[], []]
+    for a, b in graph.edges:
+        if st.has_edge(a, b):
+            attrib_cat.categories[0].append((a,b))
+        else:
+            attrib_cat.categories[1].append((a,b))
+
+    attrib_cat.categories_name = ["Edge(s) in", "Edge(s) out"]
+    rgb = sns.color_palette(None, 2)
+    attrib_cat.categories_color = [matplotlib.colors.to_hex(col) for col in rgb]
+    attrib_cat.categories_to_keep = [True for i in range(2)]
+
 def attr_data_node_2_num_factory(df, node_column, val_column):
     def attr_data_node_2_num(graph, attr):
         for n in graph.nodes:
@@ -234,17 +250,49 @@ def attr_data_node_2_cat_factory(df, node_column, val_column):
 
     return attr_data_node_2_cat
 
+def attr_data_edge_2_cat_factory(df, node1_column, node2_column, val_column):
+    def attr_data_edge_2_cat(graph, attr):
+        cat_name = {"None": 0}
+        name_counter = 1
+
+        attr.categories = [[]]
+        for a, b in graph.edges:
+            cat = df.loc[(df[node1_column] == a)].loc[(df[node2_column] == b)][val_column].values
+            if len(cat) == 0:
+                cat = "None"
+            else:
+                cat = str(cat[0])
+                if cat == "-": cat = "None"
+                if not cat in cat_name:
+                    cat_name[cat] = name_counter
+                    attr.categories.append([])
+                    name_counter += 1
+
+            attr.categories[cat_name[cat]].append((a, b))
+
+        attr.categories.sort(reverse=True, key=len)
+
+        n_cat = len(cat_name)
+        attr.categories_name = [0 for i in range(n_cat)]
+        for k, v in cat_name.items():
+            attr.categories_name[v] = k
+
+        attr.categories_to_keep = [True for i in range(n_cat)]
+        rgb = sns.color_palette(None, n_cat)
+        attr.categories_color = [matplotlib.colors.to_hex(col) for col in rgb]
+
+    return attr_data_edge_2_cat
+
 def shortest_path(source, target, graph, method='dijkstra'):
+    color = get_node_color(graph, source)
+
     path = nx.algorithms.shortest_path(graph, source=source, target=target, method=method)
     idx = 0
     for i in range(len(path) - 1):
-        change_node_color(graph, path[idx], 'red')
-        change_node_size(graph, path[idx], 100)
+        change_node_color(graph, path[idx], color)
         idx += 1
-        change_edge_color(graph, path[i], path[i + 1], 'red')
-        change_edge_width(graph, path[i], path[i + 1], 100)
-    change_node_color(graph, path[idx], 'red')
-    change_node_size(graph, path[idx], 100)
+        change_edge_color(graph, path[i], path[i + 1], color)
+    change_node_color(graph, path[idx], color)
 
 
 def minimum_spanning_tree(graph):

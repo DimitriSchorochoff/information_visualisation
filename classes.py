@@ -230,21 +230,6 @@ class Attribute_categorical(Attribute):
         self.categories_color = []
         self.categories_to_keep = []
         self.categories = []  # List of list of node/edge id
-    """
-        def smooth_name_len(self):
-        len_max = 0
-        for s in self.categories_name:
-            current_len = len(s)
-            if current_len > len_max:
-                len_max = current_len
-
-        print(len_max)
-        for i in range(len(self.categories_name)):
-            len_diff = len_max - len(self.categories_name[i])
-            print(len_diff)
-            self.categories_name[i] = self.categories_name[i] + (" " * (len_diff+1)) + ":"
-            print(len(self.categories_name[i] ))
-    """
 
     def filter_graph(self, graph):
         for i in range(len(self.categories_to_keep)):
@@ -253,12 +238,6 @@ class Attribute_categorical(Attribute):
                     graph.remove_nodes_from(self.categories[i])
                 else:
                     graph.remove_edges_from(self.categories[i])
-
-
-class Attribute_algorithm(Attribute):
-    def __init__(self, name, default_color):
-        super().__init__(name, 2)
-        self.color = default_color
 
 
 class Layout:
