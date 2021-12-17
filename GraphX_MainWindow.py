@@ -21,10 +21,10 @@ FILE_PTM_PATH = None
 DEBUG = True
 
 if DEBUG:
-    #FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
-    #FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
-    #FILE_CHEMICALS_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
-    #FILE_PTM_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
+    # FILE_NODES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
+    # FILE_EDGES_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
+    # FILE_CHEMICALS_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
+    # FILE_PTM_PATH = r"d:\Users\Home\Documents\Unif\M1 Q1\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
     FILE_NODES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-GENES.projectindex.txt"
     FILE_EDGES_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-INTERACTIONS.tab3.txt"
     FILE_CHEMICALS_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
@@ -46,7 +46,7 @@ STYLE_SHEET = """
     QTabWidget {{
         background-color: {light_color}
     }}
-    
+
     QCheckBox {{
         background-color: {light_color}
     }}
@@ -65,13 +65,13 @@ STYLE_SHEET = """
         selection-background-color: {light_color};
         selection-color: #000000
     }}
-    
+
     QComboBox {{
         background-color: {light_color};
         selection-background-color: {dark_color};
         selection-color: #000000
     }}
-    
+
     QListView
     {{
         background-color: {dark_color};
@@ -84,12 +84,12 @@ STYLE_SHEET = """
         selection-background-color: {dark_color};
         selection-color: #000000
     }}
-    
+
     QScrollBar {{
         background-color: {light_color}
     }}
-    
-    
+
+
     QSlider::handle{{
         background: {dark_color};
         width: 16px; 
@@ -99,7 +99,7 @@ STYLE_SHEET = """
         margin-bottom: -5px; 
         border-radius: 8px; 
     }}
-    
+
     QWebEngineView{{
         background-color: {light_color}
     }}
@@ -107,12 +107,13 @@ STYLE_SHEET = """
 
 STYLE_SHEET = STYLE_SHEET.format(dark_color=dark_color, light_color=light_color, highlight_color=highlight_color)
 
+
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
         # Init graph + df
         self.graph_current, self.df_node, self.df_edge = side_fun.load_graph_from_csv(FILE_NODES_PATH,
-                                                                                         FILE_EDGES_PATH)
+                                                                                      FILE_EDGES_PATH)
         self.graph_original = copy.deepcopy(self.graph_current)
         self.df_chemicals = pd.read_csv(FILE_CHEMICALS_PATH, sep='\t')
         self.df_ptm = pd.read_csv(FILE_PTM_PATH, sep='\t')
@@ -391,7 +392,6 @@ class Ui_MainWindow(object):
 
         self.node_vlayout_right.addLayout(self.node_shortest_path_hlayout)
 
-
         self.horizontalLayout_3.addLayout(self.node_vlayout_right, 6)
 
         self.node_build_button = QtWidgets.QPushButton(self.tab_layout)
@@ -504,26 +504,26 @@ class Ui_MainWindow(object):
 
         self.init_selection_lists()
 
-
     def init_list_attr(self):
         attr_lst = []
         attr_lst.append(side_fun.Attribute_numerical("Degree", True, side_fun.attr_degree_init_fun, 0))
         attr_lst.append(
             side_fun.Attribute_numerical("Clustering coefficient", True, side_fun.attr_clustering_init_fun, 0))
         attr_lst.append(side_fun.Attribute_categorical("Communities", True, side_fun.attr_find_communities))
-        attr_lst.append(side_fun.Attribute_categorical("Minimum spanning tree", False, side_fun.attr_find_min_spanning_tree))
+        attr_lst.append(
+            side_fun.Attribute_categorical("Minimum spanning tree", False, side_fun.attr_find_min_spanning_tree))
 
         # Node db
         column_cat = ["CATEGORY VALUES", "OFFICIAL SYMBOL", "SUBCATEGORY VALUES"]
         for c in column_cat:
             attr_lst.append(side_fun.Attribute_categorical("Node: {}".format(c), True,
-                                                              side_fun.attr_data_node_2_cat_factory(self.df_node,
-                                                                                                       "#BIOGRID ID", c)))
+                                                           side_fun.attr_data_node_2_cat_factory(self.df_node,
+                                                                                                 "#BIOGRID ID", c)))
         column_num = ["INTERACTION COUNT", "PTM COUNT", "CHEMICAL INTERACTION COUNT"]
         for c in column_num:
             attr_lst.append(side_fun.Attribute_numerical("Node: {}".format(c), True,
-                                                            side_fun.attr_data_node_2_num_factory(self.df_node,
-                                                                                                     "#BIOGRID ID", c), 0))
+                                                         side_fun.attr_data_node_2_num_factory(self.df_node,
+                                                                                               "#BIOGRID ID", c), 0))
 
         """
         #Edge db
@@ -534,19 +534,22 @@ class Ui_MainWindow(object):
                                                                                                      "BioGRID Gene ID", c)))
         """
 
-        #Chem db
-        column_cat = ["Systematic Name", "Official Symbol", "Action", "Interaction Type", "Author", "Chemical Name", "Chemical Brands", "Chemical Source", "Molecular Formula", "Chemical Type", "ATC Codes", "Curated By", "Method", "Related Systematic Name", "Related Official Symbol"]
+        # Chem db
+        column_cat = ["Systematic Name", "Official Symbol", "Action", "Interaction Type", "Author", "Chemical Name",
+                      "Chemical Brands", "Chemical Source", "Molecular Formula", "Chemical Type", "ATC Codes",
+                      "Curated By", "Method", "Related Systematic Name", "Related Official Symbol"]
         for c in column_cat:
             attr_lst.append(side_fun.Attribute_categorical("Chem: {}".format(c), True,
-                                                            side_fun.attr_data_node_2_cat_factory(self.df_chemicals,
-                                                                                                     "BioGRID Gene ID", c)))
+                                                           side_fun.attr_data_node_2_cat_factory(self.df_chemicals,
+                                                                                                 "BioGRID Gene ID", c)))
 
-        #PTM db
-        column_cat = ["Systematic Name", "Official Symbol", "Post Translational Modification", "Residue", "Author", "Has Relationships", "Source Database"]
+        # PTM db
+        column_cat = ["Systematic Name", "Official Symbol", "Post Translational Modification", "Residue", "Author",
+                      "Has Relationships", "Source Database"]
         for c in column_cat:
             attr_lst.append(side_fun.Attribute_categorical("PTM: {}".format(c), True,
-                                                            side_fun.attr_data_node_2_cat_factory(self.df_ptm,
-                                                                                                     "BioGRID ID", c)))
+                                                           side_fun.attr_data_node_2_cat_factory(self.df_ptm,
+                                                                                                 "BioGRID ID", c)))
 
         return attr_lst
 
@@ -900,17 +903,17 @@ class Ui_MainWindow(object):
         self.reset_attrib_layout()
         # Disconnect if possible
 
-        for w in [self.attr_filter_range_slider]:
+        for w in [self.attr_filter_range_slider, self.attr_apply_color_button.disconnect()]:
             try:
                 while True:
                     w.disconnect()
-            except Exception: pass
+            except Exception:
+                pass
 
         try:
             self.attr_scale_with_size_checkbox.disconnect()
-            self.attr_apply_color_button.disconnect()
-        except Exception: pass
-
+        except Exception:
+            pass
 
         # Find attribute
         attribute = None
@@ -928,7 +931,6 @@ class Ui_MainWindow(object):
                 self.set_attrib_layout_numerical(attribute)
                 self.attr_filter_range_slider.setDecimals(attribute.n_decimals)
                 self.attr_filter_range_slider.setVisible(True)
-
 
                 self.attr_filter_range_slider.setMinimum(sys.float_info.min)
                 self.attr_filter_range_slider.setMaximum(sys.float_info.max)
@@ -1096,7 +1098,7 @@ class Ui_MainWindow(object):
                 side_fun.change_node_color(graph, path[idx], color)
                 idx += 1
                 side_fun.change_edge_color(graph, path[i], path[i + 1], color)
-                side_fun.change_edge_width(graph, path[i], path[i+1], new_edge_size)
+                side_fun.change_edge_width(graph, path[i], path[i + 1], new_edge_size)
             side_fun.change_node_color(graph, path[idx], color)
 
         return color_shortest_path_factory
@@ -1106,7 +1108,8 @@ class Ui_MainWindow(object):
             self.node_size_spinbox.disconnect()
             self.tab_node_color_button.disconnect()
             self.node_shortest_path_button.disconnect()
-        except TypeError: pass
+        except TypeError:
+            pass
 
         if item.text() == STR_ALL_NODES:
             self.node_size_spinbox.setValue(self.all_nodes_size)
@@ -1138,7 +1141,8 @@ class Ui_MainWindow(object):
             self.node_shortest_path_to_combo.clear()
             self.node_shortest_path_to_combo.addItems(node_to_lst)
 
-            self.node_shortest_path_button.clicked.connect(self.color_shortest_path_factory(node_id, self.graph_current))
+            self.node_shortest_path_button.clicked.connect(
+                self.color_shortest_path_factory(node_id, self.graph_current))
 
     def node_selection_list_on_item_double_click(self, item):
         self.item = item
@@ -1157,11 +1161,11 @@ class Ui_MainWindow(object):
             for attribute in self.list_attribute:
                 if attribute.is_init:
                     self.data4 += f"<strong>{attribute.name}:</strong> "
-                    if attribute.type == 0: #Numerical
-                        inter = attribute.values.get(int(item.text()),-1)
+                    if attribute.type == 0:  # Numerical
+                        inter = attribute.values.get(int(item.text()), -1)
                         if inter != -1:
                             self.data4 += f"{inter}<br>"
-                    elif attribute.type == 1: #Categorical
+                    elif attribute.type == 1:  # Categorical
                         index = -1
                         for i in range(len(attribute.categories)):
                             for j in range(len(attribute.categories[i])):
@@ -1349,7 +1353,7 @@ def compute_number_of_decimal(float):
     return num_dec
 
 
-#Extended ComboBox found on https://stackoverflow.com/questions/4827207/how-do-i-filter-the-pyqt-qcombobox-items-based-on-the-text-input
+# Extended ComboBox found on https://stackoverflow.com/questions/4827207/how-do-i-filter-the-pyqt-qcombobox-items-based-on-the-text-input
 class ExtendedComboBox(QComboBox):
     def __init__(self, parent=None):
         super(ExtendedComboBox, self).__init__(parent)
@@ -1372,7 +1376,6 @@ class ExtendedComboBox(QComboBox):
         self.lineEdit().textEdited.connect(self.pFilterModel.setFilterFixedString)
         self.completer.activated.connect(self.on_completer_activated)
 
-
     # on selection of an item from the completer, select the corresponding item from combobox
     def on_completer_activated(self, text):
         if text:
@@ -1380,13 +1383,11 @@ class ExtendedComboBox(QComboBox):
             self.setCurrentIndex(index)
             self.activated[str].emit(self.itemText(index))
 
-
     # on model change, update the models of the filter and completer as well
     def setModel(self, model):
         super(ExtendedComboBox, self).setModel(model)
         self.pFilterModel.setSourceModel(model)
         self.completer.setModel(self.pFilterModel)
-
 
     # on model column change, update the model column of the filter and completer as well
     def setModelColumn(self, column):
