@@ -15,6 +15,7 @@ import pathlib
 
 from qtrangeslider import QLabeledRangeSlider
 from PyQt5.QtWidgets import QMessageBox, QColorDialog, QRadioButton
+import sys
 
 import build_graph
 import classes
@@ -464,9 +465,10 @@ class Ui_MainWindow(object):
         column_cat = ["Experimental System", "Experimental System Type", "Author", "Throughput", "Modification", "Ontology Term Names", "Ontology Term Categories", "Ontology Term Qualifier Names", "Ontology Term Types"]
         for c in column_cat:
             attr_lst.append(build_graph.Attribute_categorical("Edge: {}".format(c), True,
-                                                            build_graph.attr_data_edge_2_cat_factory(self.df_edge,
-                                                                                                     "BioGRID ID Interactor A", "BioGRID ID Interactor B", c)))
+                                                            build_graph.attr_data_node_2_cat_factory(self.df_chemicals,
+                                                                                                     "BioGRID Gene ID", c)))
         """
+
         #Chem db
         column_cat = ["Systematic Name", "Official Symbol", "Action", "Interaction Type", "Author", "Chemical Name", "Chemical Brands", "Chemical Source", "Molecular Formula", "Chemical Type", "ATC Codes", "Curated By", "Method", "Related Systematic Name", "Related Official Symbol"]
         for c in column_cat:
@@ -498,7 +500,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "GraphX"))
         self.layout_filter_button.setText(_translate("MainWindow", "Filter"))
         self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.tab_layout),
                                         _translate("MainWindow", "Layout"))
@@ -853,8 +855,9 @@ class Ui_MainWindow(object):
                 self.attr_filter_range_slider.setDecimals(attribute.n_decimals)
                 self.attr_filter_range_slider.setVisible(True)
 
-                #self.attr_filter_range_slider.setMinimum(sys.float_info.min)
-                #self.attr_filter_range_slider.setMaximum(sys.float_info.max)
+                #BALISE
+                self.attr_filter_range_slider.setMinimum(sys.float_info.min)
+                self.attr_filter_range_slider.setMaximum(sys.float_info.max)
                 self.attr_filter_range_slider.setMaximum(float(attribute.absolute_max_value))
                 self.attr_filter_range_slider.setMinimum(float(attribute.absolute_min_value))
 
@@ -1390,8 +1393,6 @@ class ExtendedComboBox(QComboBox):
 
 
 if __name__ == "__main__":
-    import sys
-
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
     MainWindow = QtWidgets.QMainWindow()
