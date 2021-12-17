@@ -2,9 +2,9 @@ import networkx as nx
 import pandas as pd
 from PyQt5 import QtCore, QtWidgets, QtWebEngineWidgets
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, Qt, pyqtSlot, QSortFilterProxyModel
-from PyQt5.QtWidgets import QCompleter, QComboBox
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QCompleter, QComboBox, QMessageBox, QColorDialog
 import pathlib
-from PyQt5.QtWidgets import QMessageBox, QColorDialog
 import sys
 
 import side_fun
@@ -30,6 +30,82 @@ if DEBUG:
     FILE_CHEMICALS_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-CHEMICALS.chemtab.txt"
     FILE_PTM_PATH = r"C:\Users\dimis\OneDrive\Documents\GitHub\information_visualisation\Data\BIOGRID-PROJECT-glioblastoma_project-PTM.ptmtab.txt"
 
+dark_color = "#373A40"
+light_color = "#686D76"
+highlight_color = "#19D3DA"
+
+STYLE_SHEET = """
+    QMainWindow {{
+        background-color: {dark_color}
+    }} 
+
+    QTabBar {{
+        background-color: {light_color}
+    }}
+
+    QTabWidget {{
+        background-color: {light_color}
+    }}
+    
+    QCheckBox {{
+        background-color: {light_color}
+    }}
+
+    QLineEdit {{
+        background-color: {dark_color}
+    }}
+
+    QPushButton {{
+        background-color: {dark_color};
+        border-color: #19D3DA
+    }}
+
+    QListWidget {{
+        background-color: {dark_color};
+        selection-background-color: {light_color};
+        selection-color: #000000
+    }}
+    
+    QComboBox {{
+        background-color: {light_color};
+        selection-background-color: {dark_color};
+        selection-color: #000000
+    }}
+    
+    QListView
+    {{
+        background-color: {dark_color};
+        selection-background-color: {light_color};
+        selection-color: #000000
+    }}
+
+    QDoubleSpinBox {{
+        background-color: {light_color};
+        selection-background-color: {dark_color};
+        selection-color: #000000
+    }}
+    
+    QScrollBar {{
+        background-color: {light_color}
+    }}
+    
+    
+    QSlider::handle{{
+        background: {dark_color};
+        width: 16px; 
+        height: 16px; 
+        line-height: 20px; 
+        margin-top: -5px; 
+        margin-bottom: -5px; 
+        border-radius: 8px; 
+    }}
+    
+    QWebEngineView{{
+        background-color: {light_color}
+    }}
+"""
+
+STYLE_SHEET = STYLE_SHEET.format(dark_color=dark_color, light_color=light_color, highlight_color=highlight_color)
 
 class Ui_MainWindow(object):
 
@@ -60,6 +136,8 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.splitter)
 
         self.webEngineView = QtWebEngineWidgets.QWebEngineView(self.centralwidget)
+        self.webEngineView.page().setBackgroundColor(QColor(light_color))
+        self.webEngineView.setStyleSheet('background-color: {};'.format(light_color))
 
         self.splitter.addWidget(self.webEngineView)
 
@@ -101,10 +179,12 @@ class Ui_MainWindow(object):
         self.layout_widget_right.setLayout(self.layout_layout_right)
 
         self.layout_scroll_area = QtWidgets.QScrollArea()
+        self.layout_scroll_area.setObjectName("layout_scroll_area")
         self.layout_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.layout_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.layout_scroll_area.setWidgetResizable(True)
         self.layout_scroll_area.setWidget(self.layout_widget_right)
+        self.layout_scroll_area.setStyleSheet('background-color: {};'.format(light_color))
 
         self.horizontalLayout_2.addWidget(self.layout_scroll_area, 6)
 
@@ -188,6 +268,7 @@ class Ui_MainWindow(object):
         self.attr_scroll_area.setWidgetResizable(True)
         self.attr_scroll_area.setWidget(self.attr_cat_widgets)
         self.attr_scroll_area.setVisible(False)
+        self.attr_scroll_area.setStyleSheet("background-color: {};".format(light_color))
         self.tab_attr_vertical_right.addWidget(self.attr_scroll_area, 6)
 
         self.attr_lower_hlayout = QtWidgets.QHBoxLayout(self.tab_attr)
@@ -558,7 +639,10 @@ class Ui_MainWindow(object):
                 a.filter_graph(new_graph)
             # We scale after filtering all element
             for a in attribute_copy:
-                a.scale_graph(new_graph)
+                try:
+                    a.scale_graph(new_graph)
+                except Exception as e:
+                    print(e)
 
             side_fun.draw_graph(new_graph, current_layout)
             self.finished.emit()
@@ -816,11 +900,16 @@ class Ui_MainWindow(object):
         self.reset_attrib_layout()
         # Disconnect if possible
 
-        for w in [self.attr_filter_range_slider, self.attr_scale_with_size_checkbox, self.attr_apply_color_button]:
+        for w in [self.attr_filter_range_slider]:
             try:
                 while True:
                     w.disconnect()
-            except TypeError: pass
+            except Exception: pass
+
+        try:
+            self.attr_scale_with_size_checkbox.disconnect()
+            self.attr_apply_color_button.disconnect()
+        except Exception: pass
 
 
         # Find attribute
@@ -839,6 +928,7 @@ class Ui_MainWindow(object):
                 self.set_attrib_layout_numerical(attribute)
                 self.attr_filter_range_slider.setDecimals(attribute.n_decimals)
                 self.attr_filter_range_slider.setVisible(True)
+
 
                 self.attr_filter_range_slider.setMinimum(sys.float_info.min)
                 self.attr_filter_range_slider.setMaximum(sys.float_info.max)
@@ -1308,6 +1398,7 @@ class ExtendedComboBox(QComboBox):
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
+    app.setStyleSheet(STYLE_SHEET)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)

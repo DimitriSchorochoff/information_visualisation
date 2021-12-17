@@ -63,6 +63,7 @@ class Attribute_numerical(Attribute):
         self.current_max_value = self.absolute_max_value
 
     def normalize_value(self, value):
+        #if self._filtered_max_value == 0: return (value - self._filtered_min_value)
         return (value - self._filtered_min_value) / self._filtered_max_value
 
     def get_color_index(self, value):
@@ -109,8 +110,8 @@ class Attribute_numerical(Attribute):
         self.absolute_max_value = 1
         self.current_min_value = 0
         self.current_max_value = 1
-        self._filtered_max_value = 0
-        self._filtered_min_value = 1
+        self._filtered_min_value = 0
+        self._filtered_max_value = 1
 
     def filter_graph(self, graph):
         if self.absolute_min_value == self.current_min_value and self.absolute_max_value == self.current_max_value:
@@ -257,15 +258,21 @@ def load_graph_from_csv(filename_nodes, filename_edges):
 
 
 def draw_graph(nx_graph, layout=None):
-    nt_graph = Network(height='100%', width='100%')
+    nt_graph = Network(height='100%', width='100%', bgcolor="#686D76")
     nt_graph.from_nx(nx_graph)
 
     if layout is None or layout.name == LAYOUT_DEFAULT.name:
         nt_graph.toggle_physics(False)
     elif layout.name == LAYOUT_REPULSION.name:
-        nt_graph.repulsion()
+        list_param = layout.parameter_lst
+        nt_graph.repulsion(node_distance=list_param[0].start, central_gravity=list_param[1].start,
+                            spring_length=list_param[2].start, spring_strength=list_param[3].start,
+                            damping=list_param[4].start)
     elif layout.name == LAYOUT_FORCEATLAS.name:
-        nt_graph.force_atlas_2based()
+        list_param = layout.parameter_lst
+        nt_graph.force_atlas_2based(gravity=list_param[0].start, central_gravity=list_param[1].start,
+                            spring_length=list_param[2].start, spring_strength=list_param[3].start,
+                            damping=list_param[4].start, overlap=list_param[5].start)
     elif layout.name == LAYOUT_BARNES.name:
         list_param = layout.parameter_lst
         nt_graph.barnes_hut(gravity=list_param[0].start, central_gravity=list_param[1].start,

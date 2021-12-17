@@ -188,25 +188,12 @@ class Ui_MainWindow(QDialog):
         self.pushButton.setText(_translate("MainWindow", "Build graph"))
 
 
-STYLE_SHEET = """
-    QMainWindow {
-        background-color: #383738
-    }  
-    
-    QMenuBar {
-         background-color: #383738;
-    }
-     QMenuBar::item {
-     background: #383738;
-    } 
-"""
-
 if __name__ == "__main__":
     import sys
 
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
-    app.setStyleSheet(STYLE_SHEET)
+    app.setStyleSheet(GraphX_MainWindow.STYLE_SHEET)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
